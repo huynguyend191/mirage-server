@@ -1,7 +1,7 @@
 {
-  "name": "encoon-server",
+  "name": "mirage-server",
   "version": "1.0.0",
-  "description": "Server for encoon",
+  "description": "Server for Mirage",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/huynguyend191/encoon-server.git"
+    "url": "https://github.com/huynguyend191/mirage-server.git"
   },
   "author": "huynguyend191",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/huynguyend191/encoon-server/issues"
+    "url": "https://github.com/huynguyend191/mirage-server/issues"
   },
-  "homepage": "https://github.com/huynguyend191/encoon-server#readme",
+  "homepage": "https://github.com/huynguyend191/mirage-server#readme",
   "dependencies": {
     "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
