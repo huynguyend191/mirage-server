@@ -4,6 +4,8 @@
 #resources
 /resources
 
-#environment variables/config
+#environment variables
 .env
+
+#db config
 /database/config.json
