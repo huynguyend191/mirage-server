@@ -26,18 +26,52 @@ exports.login = async (req, res) => {
         });
         return res.status(200).json({
           message: msg.MSG_SUCCESS,
-          username: account.username
+          account: {
+            id: account.id,
+            username: account.username,
+            role: account.role
+          }
         })
-      } else {
-        return res.status(httpStatus.UNAUTHORIZED).json({
-          message: msg.MSG_LOGIN_FAIL
+      }
+    }
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: msg.MSG_LOGIN_FAIL
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: httpStatus.getStatusText(httpStatus.INTERNAL_SERVER_ERROR)
+    });
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: {
+        id: req.params.id
+      }
+    });
+    if (account) {
+      const match = bcrypt.compareSync(req.body.oldPassword, account.password);
+      if (match) {
+        const newPass = bcrypt.hashSync(req.body.newPassword, parseInt(process.env.SALT_ROUND));
+        await Account.update(
+          { password: newPass },
+          {
+            where: {
+              id: account.id
+            }
+          }
+        );
+        return res.status(httpStatus.OK).json({
+          message: msg.MSG_SUCCESS
         });
       }
-    } else {
-      return res.status(httpStatus.UNAUTHORIZED).json({
-        message: msg.MSG_LOGIN_FAIL
-      });
     }
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: msg.MSG_CHANGE_PASS_FAIL
+    });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
