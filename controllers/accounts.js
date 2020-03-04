@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
           expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
           overwrite: true,
         });
-        return res.status(200).json({
+        return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS,
           account: {
             id: account.id,
