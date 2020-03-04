@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
 const accountRoutes = require('./routes/accounts');
+const preferenceRoutes = require('./routes/preferences');
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -18,5 +19,6 @@ app.use(
 app.use(morgan('common')); //access logs
 
 app.use('/accounts', accountRoutes);
+app.use('/preferences', preferenceRoutes);
 
 module.exports = app;

@@ -21,4 +21,6 @@ const Account = connection.sequelize.define(
   }
 );
 
+  
+
 module.exports = Account;

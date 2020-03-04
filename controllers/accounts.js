@@ -2,7 +2,7 @@ const Account = require('../models/Account');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const msg = require('../lib/constants/messages');
-const constants = require('../lib/constants/constants');
+const constants = require('../lib/constants/common');
 const httpStatus = require('http-status-codes');
 
 exports.login = async (req, res) => {
@@ -75,7 +75,7 @@ exports.changePassword = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: httpStatus.getStatusText(httpStatus.INTERNAL_SERVER_ERROR)
+      message: msg.MSG_CHANGE_PASS_FAIL
     });
   }
 }
