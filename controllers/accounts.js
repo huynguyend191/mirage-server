@@ -3,34 +3,33 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const msg = require('../lib/constants/messages');
 const constants = require('../lib/constants/common');
+const roles = require('../lib/constants/account').ROLES;
 const httpStatus = require('http-status-codes');
 
-exports.login = async (req, res) => {
+exports.adminLogin = async (req, res) => {
   try {
     const account = await Account.findOne({
       where: {
-        username: req.body.username
+        username: req.body.username,
+        role: roles.ADMIN
       }
     });
     if (account) {
       const match = bcrypt.compareSync(req.body.password, account.password);
       if (match) {
-        const token = jwt.sign({
+        const resAcc = {
           id: account.id,
           username: account.username,
           role: account.role
-        }, process.env.JWT_KEY);
+        }
+        const token = jwt.sign(resAcc, process.env.JWT_KEY);
         res.cookie(constants.ACCESS_TOKEN, token, {
           expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
-          overwrite: true,
+          overwrite: true
         });
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS,
-          account: {
-            id: account.id,
-            username: account.username,
-            role: account.role
-          }
+          account: resAcc
         })
       }
     }

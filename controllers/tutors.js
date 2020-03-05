@@ -8,9 +8,13 @@ const Op = require('sequelize').Op;
 const httpStatus = require('http-status-codes');
 const validateEmail = require('../lib/utils/validateData').validateEmail;
 const validateString = require('../lib/utils/validateData').validateString;
-const roles = require('../lib/constants/roles');
+const roles = require('../lib/constants/account').ROLES;
+const states = require('../lib/constants/account').STATES;
+const verfication = require('../lib/constants/account').VERIFICATION;
 const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
+const sendMail = require('../lib/utils/sendMail');
+const emailInfo = require('../lib/constants/emailInfo');
 
 exports.createTutor = async (req, res) => {
   let transaction;
@@ -47,25 +51,27 @@ exports.createTutor = async (req, res) => {
       await Tutor.create({
         id: uuid(),
         accountId: accId,
-        name: req.body.name
+        name: req.body.name,
+        verified: verfication.UNVERIFIED,
+        state: states.ACTIVE
       }, { transaction });
       await transaction.commit();
-      const token = jwt.sign({
+
+      const responseAcc = {
         id: accId,
         username: req.body.username,
-        role: roles.TUTOR
-      }, process.env.JWT_KEY);
+        role: roles.TUTOR,
+        verified: verfication.UNVERIFIED,
+      };
+      const token = jwt.sign(responseAcc, process.env.JWT_KEY);
       res.cookie(constants.ACCESS_TOKEN, token, {
         expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
         overwrite: true
       });
+      sendMail(req.body.email, token, emailInfo.VERIFY_TITLE);
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
-        account: {
-          id: accId,
-          username: req.body.username,
-          role: roles.TUTOR
-        }
+        account: responseAcc
       });
     }
     return res.status(httpStatus.BAD_REQUEST).json({
