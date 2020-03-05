@@ -19,7 +19,14 @@ const Preference = connection.sequelize.define(
       type: Sequelize.STRING(200),
       unique: true
     }
-  }
+  }, {
+  indexes: [
+    {
+      unique: false,
+      fields: ['type']
+    }
+  ]
+}
 );
 
 module.exports = Preference;

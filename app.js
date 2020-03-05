@@ -7,6 +7,8 @@ const morgan = require('morgan');
 
 const accountRoutes = require('./routes/accounts');
 const preferenceRoutes = require('./routes/preferences');
+const tutorRoutes = require('./routes/tutors');
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -20,5 +22,6 @@ app.use(morgan('common')); //access logs
 
 app.use('/accounts', accountRoutes);
 app.use('/preferences', preferenceRoutes);
+app.use('/tutors', tutorRoutes);
 
 module.exports = app;

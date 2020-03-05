@@ -12,15 +12,34 @@ const Account = connection.sequelize.define(
       type: Sequelize.STRING(36),
       unique: true,
     },
+    email: {
+      type: Sequelize.STRING(255),
+      unique: true,
+    },
     password: {
       type: Sequelize.TEXT
     },
     role: {
       type: Sequelize.INTEGER
     }
-  }
+  }, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['username']
+    },
+    {
+      unique: true,
+      fields: ['email']
+    },
+    {
+      unique: false,
+      fields: ['role']
+    }
+  ]
+}
 );
 
-  
+
 
 module.exports = Account;

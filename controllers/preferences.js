@@ -1,5 +1,4 @@
 const Preference = require('../models/Preference');
-const uuid = require('uuid/v4');
 const msg = require('../lib/constants/messages');
 const httpStatus = require('http-status-codes');
 
