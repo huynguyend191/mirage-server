@@ -9,6 +9,8 @@ const httpStatus = require('http-status-codes');
 const validateEmail = require('../lib/utils/validateData').validateEmail;
 const validateString = require('../lib/utils/validateData').validateString;
 const roles = require('../lib/constants/roles');
+const constants = require('../lib/constants/common');
+const jwt = require('jsonwebtoken');
 
 exports.createTutor = async (req, res) => {
   let transaction;
@@ -42,15 +44,28 @@ exports.createTutor = async (req, res) => {
         email: req.body.email,
         role: roles.TUTOR
       }, { transaction });
-      console.log(req.body.name);
       await Tutor.create({
         id: uuid(),
         accountId: accId,
         name: req.body.name
       }, { transaction });
       await transaction.commit();
+      const token = jwt.sign({
+        id: accId,
+        username: req.body.username,
+        role: roles.TUTOR
+      }, process.env.JWT_KEY);
+      res.cookie(constants.ACCESS_TOKEN, token, {
+        expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
+        overwrite: true
+      });
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS
+        message: msg.MSG_SUCCESS,
+        account: {
+          id: accId,
+          username: req.body.username,
+          role: roles.TUTOR
+        }
       });
     }
     return res.status(httpStatus.BAD_REQUEST).json({
