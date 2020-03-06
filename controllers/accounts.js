@@ -109,7 +109,7 @@ exports.verifyAccount = async (req, res) => {
         });
         await UnverifiedAccount.destroy({
           where: {
-            ida: req.params.id
+            id: req.params.id
           }
         });
         return res.redirect("https://www.google.com");
