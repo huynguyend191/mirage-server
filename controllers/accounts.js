@@ -172,7 +172,7 @@ exports.resendVerify = async (req, res) => {
       sendMail.verifyMail(req.body.email);
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
-      });  
+      });
     }
     return res.status(httpStatus.BAD_REQUEST).json({
       message: msg.MSG_FAIL_RESEND_VERIFY
