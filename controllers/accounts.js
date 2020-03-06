@@ -8,12 +8,18 @@ const verification = require('../lib/constants/account').VERIFICATION;
 const expireVerify = require('../lib/constants/emailInfo').VERIFY_MAIL_EXPIRE;
 const state = require('../lib/constants/account').STATES;
 const httpStatus = require('http-status-codes');
+const generatePass = require('generate-password');
+const Op = require('sequelize').Op;
+const sendMail = require('../lib/utils/sendMail');
 
 exports.login = async (req, res) => {
   try {
     const account = await Account.findOne({
       where: {
-        username: req.body.username,
+        [Op.or]: [
+          { username: req.body.user },
+          { email: req.body.user }
+        ],
         state: state.ACTIVE
       }
     });
@@ -83,6 +89,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+//TO DO: Update redirect URL to front-end
 exports.verifyAccount = async (req, res) => {
   try {
     const unverifiedAcc = await UnverifiedAccount.findOne({
@@ -102,18 +109,58 @@ exports.verifyAccount = async (req, res) => {
         });
         await UnverifiedAccount.destroy({
           where: {
-            id: req.params.id
+            ida: req.params.id
           }
         });
-        return res.status(httpStatus.OK).send('OK');
+        return res.redirect("https://www.google.com");
       }
-      return res.status(httpStatus.BAD_REQUEST).send('Please resend verify');
     }
-    return res.status(httpStatus.BAD_REQUEST).send('Please verify again');
+    return res.status(httpStatus.BAD_REQUEST).redirect('https://www.reddit.com/');
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect('https://www.reddit.com/');
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    if (req.body.user) {
+      const account = await Account.findOne({
+        where: {
+          [Op.or]: [
+            { username: req.body.user },
+            { email: req.body.user }
+          ],
+          state: state.ACTIVE
+        }
+      });
+      if (account) {
+        const randomPass = generatePass.generate({
+          length: 10,
+          numbers: true
+        });
+        const newPass = bcrypt.hashSync(randomPass, parseInt(process.env.SALT_ROUND));
+        await Account.update(
+          { password: newPass },
+          {
+            where: {
+              id: account.id
+            }
+          }
+        );
+        sendMail.resetPasswordMail(account.email, account.username, randomPass);
+        return res.status(httpStatus.OK).json({
+          message: msg.MSG_SUCCESS
+        });
+      }
+    }
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: msg.MSG_INVALID_ACCOUNT
+    })
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: "Dead"
+      message: msg.MSG_FAIL_RESET_PASS
     });
   }
 }
