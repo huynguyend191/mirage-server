@@ -10,6 +10,8 @@ const preferenceRoutes = require('./routes/preferences');
 const tutorRoutes = require('./routes/tutors');
 const studentRoutes = require('./routes/students');
 
+const checkAuth = require('./middlewares/checkAuth');
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -21,7 +23,7 @@ app.use(
 app.use(morgan('common')); //access logs
 
 app.use('/accounts', accountRoutes);
-app.use('/preferences', preferenceRoutes);
+app.use('/preferences', checkAuth ,preferenceRoutes);
 app.use('/tutors', tutorRoutes);
 app.use('/students', studentRoutes);
 
