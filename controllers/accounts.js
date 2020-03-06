@@ -11,6 +11,7 @@ const httpStatus = require('http-status-codes');
 const generatePass = require('generate-password');
 const Op = require('sequelize').Op;
 const sendMail = require('../lib/utils/sendMail');
+const validateEmail = require('../lib/utils/validateData').validateEmail;
 
 exports.login = async (req, res) => {
   try {
@@ -161,6 +162,25 @@ exports.resetPassword = async (req, res) => {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_RESET_PASS
+    });
+  }
+}
+
+exports.resendVerify = async (req, res) => {
+  try {
+    if (validateEmail(req.body.email)) {
+      sendMail.verifyMail(req.body.email);
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      });  
+    }
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: msg.MSG_FAIL_RESEND_VERIFY
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_RESEND_VERIFY
     });
   }
 }
