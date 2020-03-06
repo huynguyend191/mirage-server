@@ -14,7 +14,6 @@ const verfication = require('../lib/constants/account').VERIFICATION;
 const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../lib/utils/sendMail');
-const emailInfo = require('../lib/constants/emailInfo');
 
 exports.createTutor = async (req, res) => {
   let transaction;
@@ -46,14 +45,14 @@ exports.createTutor = async (req, res) => {
         username: req.body.username,
         password: hashPassword,
         email: req.body.email,
-        role: roles.TUTOR
+        role: roles.TUTOR,
+        verification: verfication.UNVERIFIED,
+        state: states.ACTIVE
       }, { transaction });
       await Tutor.create({
         id: uuid(),
         accountId: accId,
-        name: req.body.name,
-        verified: verfication.UNVERIFIED,
-        state: states.ACTIVE
+        name: req.body.name
       }, { transaction });
       await transaction.commit();
 
@@ -61,14 +60,16 @@ exports.createTutor = async (req, res) => {
         id: accId,
         username: req.body.username,
         role: roles.TUTOR,
-        verified: verfication.UNVERIFIED,
+        verification: verfication.UNVERIFIED,
       };
+
       const token = jwt.sign(responseAcc, process.env.JWT_KEY);
       res.cookie(constants.ACCESS_TOKEN, token, {
         expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
         overwrite: true
       });
-      sendMail(req.body.email, token, emailInfo.VERIFY_TITLE);
+
+      sendMail.verifyMail(req.body.email);
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
         account: responseAcc

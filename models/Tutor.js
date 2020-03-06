@@ -12,12 +12,6 @@ const Tutor = connection.sequelize.define(
     name: {
       type: Sequelize.STRING(100)
     },
-    state: {
-      type: Sequelize.BOOLEAN
-    },
-    verification: {
-      type: Sequelize.BOOLEAN
-    },
     profileStatus: {
       type: Sequelize.INTEGER
     },
@@ -65,7 +59,7 @@ const Tutor = connection.sequelize.define(
       },
       {
         unique: false,
-        fields: ['state', 'verification', 'profileStatus']
+        fields: ['profileStatus']
       }
     ]
   }

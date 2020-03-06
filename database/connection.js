@@ -12,7 +12,7 @@ const sequelize = new Sequelize(
     port: config.port,
     dialect: config.dialect,
     pool: config.pool
-  } 
+  }
 );
 
 sequelize.sync({  

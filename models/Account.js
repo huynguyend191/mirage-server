@@ -21,7 +21,13 @@ const Account = connection.sequelize.define(
     },
     role: {
       type: Sequelize.INTEGER
-    }
+    },
+    state: {
+      type: Sequelize.BOOLEAN
+    },
+    verification: {
+      type: Sequelize.BOOLEAN
+    },
   }, {
   indexes: [
     {
@@ -35,11 +41,13 @@ const Account = connection.sequelize.define(
     {
       unique: false,
       fields: ['role']
+    },
+    {
+      unique: false,
+      fields: ['state', 'verification']
     }
   ]
 }
 );
-
-
 
 module.exports = Account;

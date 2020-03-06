@@ -1,17 +1,20 @@
 const Account = require('../models/Account');
+const UnverifiedAccount = require('../models/UnverifiedAccount');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const msg = require('../lib/constants/messages');
 const constants = require('../lib/constants/common');
-const roles = require('../lib/constants/account').ROLES;
+const verification = require('../lib/constants/account').VERIFICATION;
+const expireVerify = require('../lib/constants/emailInfo').VERIFY_MAIL_EXPIRE;
+const state = require('../lib/constants/account').STATES;
 const httpStatus = require('http-status-codes');
 
-exports.adminLogin = async (req, res) => {
+exports.login = async (req, res) => {
   try {
     const account = await Account.findOne({
       where: {
         username: req.body.username,
-        role: roles.ADMIN
+        state: state.ACTIVE
       }
     });
     if (account) {
@@ -20,7 +23,8 @@ exports.adminLogin = async (req, res) => {
         const resAcc = {
           id: account.id,
           username: account.username,
-          role: account.role
+          role: account.role,
+          verification: account.verification
         }
         const token = jwt.sign(resAcc, process.env.JWT_KEY);
         res.cookie(constants.ACCESS_TOKEN, token, {
@@ -42,7 +46,7 @@ exports.adminLogin = async (req, res) => {
       message: httpStatus.getStatusText(httpStatus.INTERNAL_SERVER_ERROR)
     });
   }
-}
+};
 
 exports.changePassword = async (req, res) => {
   try {
@@ -75,6 +79,41 @@ exports.changePassword = async (req, res) => {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_CHANGE_PASS_FAIL
+    });
+  }
+};
+
+exports.verifyAccount = async (req, res) => {
+  try {
+    const unverifiedAcc = await UnverifiedAccount.findOne({
+      where: {
+        id: req.params.id
+      }
+    });
+    if (unverifiedAcc) {
+      const createTime = Date.parse(unverifiedAcc.createdAt);
+      if (createTime + expireVerify > Date.now()) {
+        await Account.update({
+          verification: verification.VERIFIED
+        },{
+          where: {
+            email: unverifiedAcc.email
+          }
+        });
+        await UnverifiedAccount.destroy({
+          where: {
+            id: req.params.id
+          }
+        });
+        return res.status(httpStatus.OK).send('OK');
+      }
+      return res.status(httpStatus.BAD_REQUEST).send('Please resend verify');
+    }
+    return res.status(httpStatus.BAD_REQUEST).send('Please verify again');
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "Dead"
     });
   }
 }
