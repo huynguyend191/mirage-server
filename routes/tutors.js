@@ -8,6 +8,6 @@ router.post('/register', tutorController.createTutor);
 router.get('/', tutorController.getAllTutors);
 router.get('/:id', tutorController.getTutor);
 router.delete('/:id', checkAuth(roles.ADMIN), tutorController.deleteTutor);
-router.put('/:id', checkAuth(roles.USER), tutorController.updateTutor);
+router.put('/:id', checkAuth(), tutorController.updateTutor);
 
 module.exports = router;

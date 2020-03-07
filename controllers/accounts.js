@@ -164,7 +164,7 @@ exports.resetPassword = async (req, res) => {
       message: msg.MSG_FAIL_RESET_PASS
     });
   }
-}
+};
 
 exports.resendVerify = async (req, res) => {
   try {
@@ -182,5 +182,36 @@ exports.resendVerify = async (req, res) => {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_RESEND_VERIFY
     });
+  }
+};
+
+exports.updateAccount = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: { id: req.params.id }
+    });
+    if (!Object.values(state).includes(req.body.state)) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: msg.MSG_FAIL_TO_UPDATE,
+      });
+    }
+    if (account) {
+      await Account.update({
+        state: req.body.state
+      }, {
+        where: { id: account.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS,
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    })
   }
 }

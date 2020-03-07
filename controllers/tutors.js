@@ -204,13 +204,14 @@ exports.deleteTutor = async (req, res) => {
 
 exports.updateTutor = async (req, res) => {
   try {
+    // only admin can send profileStatus
     if (req.body.profileStatus) {
       if (req.role != roles.ADMIN) {
         return res.status(httpStatus.FORBIDDEN).json({
           message: msg.MSG_FORBIDDEN
         });
       }
-      if (!Object.values(profileStatus).includes(parseInt(req.body.profileStatus))) {
+      if (!Object.values(profileStatus).includes(req.body.profileStatus)) {
         return res.status(httpStatus.BAD_REQUEST).json({
           message: msg.MSG_FAIL_TO_UPDATE
         });
@@ -221,7 +222,7 @@ exports.updateTutor = async (req, res) => {
     });
     const tutorInfo = {
       name: req.body.name || tutor.name,
-      profileStatus: req.body.profileStatus || tutor.profileStatus,
+      profileStatus: req.body.profileStatus || profileStatus.PENDING, //if not Admin send, auto set profileStatus to PENDING
       phone: req.body.phone || tutor.phone,
       birthdate: req.body.birthdate || tutor.birthdate,
       address: req.body.address || tutor.address,

@@ -8,7 +8,7 @@ module.exports = (role) => {
         const decoded = jwt.verify(req.cookies.access_token, process.env.JWT_KEY);
         req.role = decoded.role;
         req.username = decoded.username;
-        if (req.role > role) {
+        if (role && req.role > role) {
           return res.status(403).json({
             message: msg.MSG_FORBIDDEN
           });
