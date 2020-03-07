@@ -90,7 +90,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-//TO DO: Update redirect URL to front-end
+//TODO: Update redirect URL to front-end
 exports.verifyAccount = async (req, res) => {
   try {
     const unverifiedAcc = await UnverifiedAccount.findOne({
