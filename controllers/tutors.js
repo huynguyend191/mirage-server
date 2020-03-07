@@ -47,7 +47,7 @@ exports.createTutor = async (req, res) => {
         username: req.body.username,
         password: hashPassword,
         email: req.body.email,
-        role: roles.USER,
+        role: roles.TUTOR,
         verification: verfication.UNVERIFIED,
         state: states.ACTIVE
       }, { transaction });
@@ -62,7 +62,7 @@ exports.createTutor = async (req, res) => {
       const responseAcc = {
         id: accId,
         username: req.body.username,
-        role: roles.USER,
+        role: roles.TUTOR,
         verification: verfication.UNVERIFIED,
       };
 
