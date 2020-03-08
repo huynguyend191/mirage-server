@@ -13,11 +13,9 @@ const Preference = connection.sequelize.define(
     },
     key: {
       type: Sequelize.STRING(10),
-      unique: true,
     },
     value: {
       type: Sequelize.STRING(200),
-      unique: true
     }
   }, {
   indexes: [

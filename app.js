@@ -23,7 +23,7 @@ app.use(
 app.use(morgan('common')); //access logs
 
 app.use('/accounts', accountRoutes);
-app.use('/preferences', checkAuth ,preferenceRoutes);
+app.use('/preferences', checkAuth(), preferenceRoutes);
 app.use('/tutors', tutorRoutes);
 app.use('/students', studentRoutes);
 
