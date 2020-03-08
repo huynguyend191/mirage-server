@@ -220,23 +220,23 @@ exports.updateTutor = async (req, res) => {
     const tutor = await Tutor.findOne({
       where: { id: req.params.id }
     });
-    const tutorInfo = {
-      name: req.body.name || tutor.name,
-      profileStatus: req.body.profileStatus || profileStatus.PENDING, //if not Admin send, auto set profileStatus to PENDING
-      phone: req.body.phone || tutor.phone,
-      birthdate: req.body.birthdate || tutor.birthdate,
-      address: req.body.address || tutor.address,
-      interests: req.body.interests || tutor.interests,
-      education: req.body.education || tutor.education,
-      experience: req.body.experience || tutor.experience,
-      profession: req.body.profession || tutor.profession,
-      certificates: req.body.certificates || tutor.certificates,
-      reason: req.body.reason || tutor.reason,
-      introduction: req.body.introduction || tutor.introduction,
-      avatar: req.body.avatar || tutor.avatar,
-      video: req.body.video || tutor.video,
-    }
     if (tutor) {
+      const tutorInfo = {
+        name: req.body.name || tutor.name,
+        profileStatus: req.body.profileStatus || profileStatus.PENDING, //if not Admin send, auto set profileStatus to PENDING
+        phone: req.body.phone || tutor.phone,
+        birthdate: Date.parse(req.body.birthdate) || tutor.birthdate,
+        address: req.body.address || tutor.address,
+        interests: req.body.interests || tutor.interests,
+        education: req.body.education || tutor.education,
+        experience: req.body.experience || tutor.experience,
+        profession: req.body.profession || tutor.profession,
+        certificates: req.body.certificates || tutor.certificates,
+        reason: req.body.reason || tutor.reason,
+        introduction: req.body.introduction || tutor.introduction,
+        avatar: req.body.avatar || tutor.avatar,
+        video: req.body.video || tutor.video,
+      }
       await Tutor.update(tutorInfo, {
         where: { id: tutor.id }
       });

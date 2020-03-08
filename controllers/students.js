@@ -14,6 +14,7 @@ const verfication = require('../lib/constants/account').VERIFICATION;
 const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../lib/utils/sendMail');
+const paginate = require('../lib/utils/sqlPaginate');
 
 exports.createStudent = async (req, res) => {
   let transaction;
@@ -85,4 +86,145 @@ exports.createStudent = async (req, res) => {
       message: msg.MSG_FAIL_TO_REGISTER
     });
   }
-}
+};
+
+exports.getAllStudents = async (req, res) => {
+  try {
+    let searchQuery = {};
+    if (req.query.search) {
+      searchQuery = {
+        [Op.or]: [
+          { name: { [Op.like]: `%${req.query.search}%` } },
+          { '$account.email$': { [Op.like]: `%${req.query.search}%` } },
+          { '$account.username$': { [Op.like]: `%${req.query.search}%` } },
+        ]
+      }
+    }
+    if (req.query.state) {
+      searchQuery['$account.state$'] = req.query.state
+    }
+    if (req.query.verification) {
+      searchQuery['$account.verification$'] = req.query.verification
+    }
+    if (req.query.profileStatus) {
+      searchQuery.profileStatus = req.query.profileStatus
+    }
+    const total = await Student.count({
+      include: [{
+        model: Account,
+        attributes: ['id', 'username', 'email', 'state', 'verification']
+      }],
+      attributes: ['id', 'name'],
+      where: searchQuery
+    });
+    const page = req.query.page || constants.DEFAULT_PAGE;
+    const pageSize = req.query.size || total;
+    const totalPages = Math.ceil(total / pageSize);
+    const students = await Student.findAll({
+      include: [{
+        model: Account,
+        attributes: ['id', 'username', 'email', 'state', 'verification']
+      }],
+      attributes: ['id', 'name'],
+      where: searchQuery,
+      ...paginate({ page, pageSize })
+    });
+    return res.status(httpStatus.OK).json({
+      message: msg.MSG_SUCCESS,
+      students: students,
+      totalResults: total,
+      totalPages: totalPages
+    });
+  }
+  catch (error) {
+    console.log(error)
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_READ
+    })
+  }
+};
+
+exports.getStudent = async (req, res) => {
+  try {
+    const student = await Student.findOne({
+      include: [{
+        model: Account,
+        attributes: ['id', 'username', 'state', 'verification']
+      }],
+      where: { id: req.params.id }
+    });
+    if (student) {
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS,
+        student: student
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_READ
+    })
+  }
+};
+
+exports.deleteStudent = async (req, res) => {
+  let transaction;
+  try {
+    const student = await Student.findOne({
+      where: { id: req.params.id }
+    });
+    if (student) {
+      transaction = await connection.sequelize.transaction();
+      await Account.destroy({
+        where: { id: student.accountId }
+      }, { transaction });
+      await Student.destroy({
+        where: { id: student.id }
+      }, { transaction });
+      await transaction.commit();
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_DELETE
+    })
+  }
+};
+
+exports.updateStudent = async (req, res) => {
+  try {
+    const student = await Student.findOne({
+      where: { id: req.params.id }
+    });
+    if (student) {
+      const studentInfo = {
+        name: req.body.name || student.name,
+        birthdate: Date.parse(req.body.birthdate) || student.birthdate,
+        phone: req.body.phone || student.phone
+      }
+      await Student.update(studentInfo, {
+        where: { id: student.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS,
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    })
+  }
+};

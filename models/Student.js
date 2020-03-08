@@ -12,6 +12,9 @@ const Student = connection.sequelize.define(
     name: {
       type: Sequelize.STRING(100)
     },
+    phone: {
+      type: Sequelize.STRING(50)
+    },
     birthdate: {
       type: Sequelize.DATE
     },
