@@ -11,6 +11,6 @@ router.post('/reset-password', accountController.resetPassword);
 router.post('/resend-verify', accountController.resendVerify);
 router.put('/:id', checkAuth(roles.ADMIN) ,accountController.updateAccount);
 router.get('/:id/preferences', checkAuth(), accountController.getAccPreferences);
-router.put('/:id/preferences', checkAuth(), accountController.updateAccPreferences);
+router.post('/:id/preferences', checkAuth(), accountController.updateAccPreferences);
 
 module.exports = router;
