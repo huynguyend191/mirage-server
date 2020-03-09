@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const connection = require('../database/connection');
 
 const Preference = connection.sequelize.define(
-  'preference',
+  'preferences',
   {
     id: {
       type: Sequelize.UUID,

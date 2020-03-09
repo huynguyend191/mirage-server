@@ -3,7 +3,7 @@ const connection = require('../database/connection');
 const Account = require('./Account');
 
 const Tutor = connection.sequelize.define(
-  'tutor',
+  'tutors',
   {
     id: {
       type: Sequelize.UUID,

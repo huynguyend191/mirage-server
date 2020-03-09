@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const connection = require('../database/connection');
 
 const UnverifiedAccount = connection.sequelize.define(
-  'unverified_account',
+  'unverified_accounts',
   {
     id: {
       type: Sequelize.UUID,
@@ -10,7 +10,6 @@ const UnverifiedAccount = connection.sequelize.define(
     },
     email: {
       type: Sequelize.STRING(255),
-      unique: true
     },
     createdAt: {
       type: Sequelize.DATE,
