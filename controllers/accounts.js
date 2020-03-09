@@ -1,4 +1,6 @@
 const Account = require('../models/Account');
+const Preference = require('../models/Preference');
+const AccountPreference = require('../models/AccountPreference');
 const UnverifiedAccount = require('../models/UnverifiedAccount');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -12,6 +14,7 @@ const generatePass = require('generate-password');
 const Op = require('sequelize').Op;
 const sendMail = require('../lib/utils/sendMail');
 const validateEmail = require('../lib/utils/validateData').validateEmail;
+const connection = require('../database/connection');
 
 exports.login = async (req, res) => {
   try {
@@ -103,7 +106,7 @@ exports.verifyAccount = async (req, res) => {
       if (createTime + expireVerify > Date.now()) {
         await Account.update({
           verification: verification.VERIFIED
-        },{
+        }, {
           where: {
             email: unverifiedAcc.email
           }
@@ -210,6 +213,76 @@ exports.updateAccount = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    })
+  }
+};
+
+exports.getAccPreferences = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      include: [{
+        model: Preference,
+        attributes: ['id', 'type', 'value']
+      }],
+      attributes: ['id'],
+      where: { id: req.params.id }
+    });
+    if (account) {
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS,
+        account: account
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_READ
+    })
+  }
+};
+
+exports.updateAccPreferences = async (req, res) => {
+  let transaction;
+  try {
+    if (!Array.isArray(req.body.preferences)) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: msg.MSG_FAIL_TO_UPDATE
+      });
+    }
+    const account = await Account.findOne({
+      where: { id: req.params.id }
+    });
+    if (account) {
+      transaction = await connection.sequelize.transaction();
+      await AccountPreference.destroy({
+        where: {
+          accountId: account.id
+        }
+      }, { transaction });
+      const accPre = [];
+      req.body.preferences.forEach(preferenceId => {
+        accPre.push({
+          accountId: account.id,
+          preferenceId: preferenceId
+        })
+      });
+      await AccountPreference.bulkCreate(accPre, { transaction, returning: true });
+      await transaction.commit();
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND
+    });
+  } catch (error) {
+    console.log(error);
+    if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
     })
