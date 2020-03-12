@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(
   cors({
+    origin: 'https://localhost:3000',
     credentials: true
   })
 )
