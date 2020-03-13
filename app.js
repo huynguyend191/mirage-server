@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const path = require('path');
 
 const accountRoutes = require('./routes/accounts');
 const preferenceRoutes = require('./routes/preferences');
