@@ -1,5 +1,7 @@
 const Account = require('../models/Account');
 const Preference = require('../models/Preference');
+const Student = require('../models/Student');
+const Tutor = require('../models/Tutor');
 const AccountPreference = require('../models/AccountPreference');
 const UnverifiedAccount = require('../models/UnverifiedAccount');
 const bcrypt = require('bcrypt');
@@ -15,6 +17,7 @@ const Op = require('sequelize').Op;
 const sendMail = require('../lib/utils/sendMail');
 const validateEmail = require('../lib/utils/validateData').validateEmail;
 const connection = require('../database/connection');
+const ROLES = require('../lib/constants/account').ROLES;
 
 exports.login = async (req, res) => {
   try {
@@ -33,8 +36,20 @@ exports.login = async (req, res) => {
         const resAcc = {
           id: account.id,
           username: account.username,
+          email: account.email,
           role: account.role,
           verification: account.verification
+        }
+        if (account.role === ROLES.TUTOR) {
+          const tutor = await Tutor.findOne({
+            where: { accountId: account.id}
+          });
+          resAcc.tutor = tutor;
+        } else if (account.role === ROLES.STUDENT) {
+          const student = await Student.findOne({
+            where: { accountId: account.id}
+          });
+          resAcc.student = student;
         }
         const token = jwt.sign(resAcc, process.env.JWT_KEY);
         res.cookie(constants.ACCESS_TOKEN, token, {
@@ -93,7 +108,6 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-//TODO: Update redirect URL to front-end
 exports.verifyAccount = async (req, res) => {
   try {
     const unverifiedAcc = await UnverifiedAccount.findOne({
@@ -116,13 +130,13 @@ exports.verifyAccount = async (req, res) => {
             id: req.params.id
           }
         });
-        return res.redirect("https://www.google.com");
+        return res.redirect('https://localhost:3000/logout');
       }
     }
-    return res.status(httpStatus.BAD_REQUEST).redirect('https://www.reddit.com/');
+    return res.status(httpStatus.BAD_REQUEST).redirect('https://localhost:3000');
   } catch (error) {
     console.log(error);
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect('https://www.reddit.com/');
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect('https://localhost:3000');
   }
 };
 

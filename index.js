@@ -10,4 +10,4 @@ const server = https.createServer(certOptions, app);
 server.listen(process.env.PORT);
 socket(server);
 
-console.log(`Server listening on: ${process.env.PORT}`)
+console.log(`Server listening on: ${process.env.PORT}`);
