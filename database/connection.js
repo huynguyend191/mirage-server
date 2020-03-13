@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const connection = {};
-const env = 'dev';
-const config = require('./config.json')[deploy];
+const env = 'deploy';
+const config = require('./config.json')[env];
 
 const sequelize = new Sequelize(
   config.database, 
