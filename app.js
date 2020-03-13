@@ -28,4 +28,10 @@ app.use('/api/preferences', checkAuth(), preferenceRoutes);
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/students', studentRoutes);
 
+app.use(express.static(path.join(__dirname, "client/build")));
+
+app.get("*", function(req, res) {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+
 module.exports = app;
