@@ -19,7 +19,7 @@ const validateEmail = require('../lib/utils/validateData').validateEmail;
 const connection = require('../database/connection');
 const ROLES = require('../lib/constants/account').ROLES;
 
-exports.login = async (req, res) => {
+exports.signIn = async (req, res) => {
   try {
     const account = await Account.findOne({
       where: {
@@ -130,7 +130,7 @@ exports.verifyAccount = async (req, res) => {
             id: req.params.id
           }
         });
-        return res.redirect('https://localhost:3000/logout');
+        return res.redirect('https://localhost:3000/sign-out');
       }
     }
     return res.status(httpStatus.BAD_REQUEST).redirect('https://localhost:3000');
