@@ -1,0 +1,30 @@
+{
+  "dev": {
+      "dialect": "mysql",
+      "host":"localhost",
+      "port":"3306",
+      "user": "admin",
+      "password": "mirage",
+      "database": "mirage",
+      "pool":{
+        "max": 10,
+        "min": 0,
+        "acquire": 30000,
+        "idle": 10000
+      }
+  },
+  "deploy": {
+    "dialect": "mysql",
+    "host":"den1.mysql5.gear.host",
+    "port":"3306",
+    "user": "mirage",
+    "password": "Oz4zYX!_B8Oc",
+    "database": "mirage",
+    "pool":{
+      "max": 10,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    }
+}
+} 

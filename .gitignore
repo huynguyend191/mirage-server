@@ -7,5 +7,3 @@
 #environment variables
 .env
 
-#db config
-/database/config.json

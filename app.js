@@ -15,17 +15,17 @@ const checkAuth = require('./middlewares/checkAuth');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: 'https://localhost:3000',
-    credentials: true
-  })
-)
+// app.use(
+//   cors({
+//     origin: 'https://localhost:3000',
+//     credentials: true
+//   })
+// )
 app.use(morgan('common')); //access logs
 
-app.use('/accounts', accountRoutes);
-app.use('/preferences', checkAuth(), preferenceRoutes);
-app.use('/tutors', tutorRoutes);
-app.use('/students', studentRoutes);
+app.use('/api/accounts', accountRoutes);
+app.use('/api/preferences', checkAuth(), preferenceRoutes);
+app.use('/api/tutors', tutorRoutes);
+app.use('/api/students', studentRoutes);
 
 module.exports = app;
