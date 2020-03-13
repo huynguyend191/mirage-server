@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const connection = {};
-const env = 'deploy';
+const env = 'dev';
 const config = require('./config.json')[env];
 
 const sequelize = new Sequelize(

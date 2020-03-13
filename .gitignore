@@ -7,3 +7,4 @@
 #environment variables
 .env
 
+/database/config

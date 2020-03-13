@@ -16,12 +16,12 @@ const checkAuth = require('./middlewares/checkAuth');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
-// app.use(
-//   cors({
-//     origin: 'https://localhost:3000',
-//     credentials: true
-//   })
-// )
+app.use(
+  cors({
+    origin: 'https://localhost:3000',
+    credentials: true
+  })
+)
 app.use(morgan('common')); //access logs
 
 app.use('/api/accounts', accountRoutes);
