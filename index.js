@@ -1,5 +1,5 @@
 // const https = require('https');
-const https = require('http');
+const http = require('http');
 const app = require('./app');
 const dotenv =  require('dotenv');
 const socket = require('./lib/utils/socket');
