@@ -5,18 +5,13 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const path = require('path');
-const passport = require('passport');
 
 const accountRoutes = require('./routes/accounts');
 const preferenceRoutes = require('./routes/preferences');
 const tutorRoutes = require('./routes/tutors');
 const studentRoutes = require('./routes/students');
-
 const checkAuth = require('./middlewares/checkAuth');
 
-require('./lib/utils/facebook-passport')(passport);
-require('./lib/utils/google-passport')(passport);
-app.use(passport.initialize());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -25,7 +20,7 @@ app.use(
     origin: 'https://localhost:3000',
     credentials: true
   })
-)
+);
 app.use(morgan('common')); //access logs
 
 app.use('/api/accounts', accountRoutes);
