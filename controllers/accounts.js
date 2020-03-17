@@ -149,7 +149,8 @@ exports.resetPassword = async (req, res) => {
             { username: req.body.user },
             { email: req.body.user }
           ],
-          state: state.ACTIVE
+          state: state.ACTIVE,
+          role: { [Op.not]: ROLES.ADMIN}
         }
       });
       if (account) {
