@@ -151,7 +151,7 @@ exports.getTutor = async (req, res) => {
     const tutor = await Tutor.findOne({
       include: [{
         model: Account,
-        attributes: ['id', 'username', 'state', 'verification']
+        attributes: ['id', 'username', 'state', 'verification', 'email']
       }],
       where: { id: req.params.id }
     });
