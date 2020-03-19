@@ -236,6 +236,11 @@ exports.updateTutor = async (req, res) => {
         introduction: req.body.introduction || tutor.introduction,
         avatar: req.body.avatar || tutor.avatar,
         video: req.body.video || tutor.video,
+        student_type: req.body.student_type || tutor.student_type,
+        student_lvl: req.body.student_lvl || tutor.student_lvl,
+        accent: req.body.accent || tutor.accent,
+        fluency: req.body.fluency || tutor.fluency,
+        specialities: JSON.stringify(req.body.specialities) || tutor.specialities,
       }
       await Tutor.update(tutorInfo, {
         where: { id: tutor.id }
