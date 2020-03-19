@@ -7,7 +7,6 @@ const morgan = require('morgan');
 const path = require('path');
 
 const accountRoutes = require('./routes/accounts');
-const preferenceRoutes = require('./routes/preferences');
 const tutorRoutes = require('./routes/tutors');
 const studentRoutes = require('./routes/students');
 const checkAuth = require('./middlewares/checkAuth');
@@ -24,7 +23,6 @@ app.use(
 app.use(morgan('common')); //access logs
 
 app.use('/api/accounts', accountRoutes);
-app.use('/api/preferences', checkAuth(), preferenceRoutes);
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/students', studentRoutes);
 
