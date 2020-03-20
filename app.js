@@ -25,6 +25,7 @@ app.use(morgan('common')); //access logs
 app.use('/api/accounts', accountRoutes);
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 app.use(express.static(path.join(__dirname, "client/build")));
 

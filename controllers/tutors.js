@@ -16,6 +16,90 @@ const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../lib/utils/sendMail');
 const paginate = require('../lib/utils/sqlPaginate');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    fs.mkdirSync(path.resolve(`uploads/tutors/${req.params.username}/avatar`), { recursive: true });
+    cb(null, `./uploads/tutors/${req.params.username}/avatar`);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+})
+
+const certificatesStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    fs.mkdirSync(path.resolve(`uploads/tutors/${req.params.username}/certificates`), { recursive: true });
+    cb(null, `./uploads/tutors/${req.params.username}/certificates`);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+})
+
+exports.uploadTutorAvatar = multer({ storage: avatarStorage }).single('avatar');
+exports.uploadCertificates = multer({ storage: certificatesStorage }).array('certificates', 10);
+
+
+exports.updateTutorAvatar = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: { username: req.params.username }
+    });
+    if (account) {
+      await Tutor.update({avatar: req.file.path}, {
+        where: { accountId: account.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      })
+    } 
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    });
+  }
+}
+
+exports.updateTutorCertificates = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: { username: req.params.username }
+    });
+    if (account) {
+      const tutor = await Tutor.findOne({
+        where: { accountId: account.id }
+      });
+      let certificates;
+      if (tutor.certificates) {
+        certificates = JSON.stringify([...JSON.parse(tutor.certificates), ...req.files]);
+      } else {
+        certificates = JSON.stringify(req.files);
+      }
+      await Tutor.update({certificates: certificates}, {
+        where: { accountId: account.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      })
+    } 
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    });
+  }
+}
 
 exports.createTutor = async (req, res) => {
   let transaction;
@@ -234,10 +318,11 @@ exports.updateTutor = async (req, res) => {
         certificates: req.body.certificates || tutor.certificates,
         reason: req.body.reason || tutor.reason,
         introduction: req.body.introduction || tutor.introduction,
-        avatar: req.body.avatar || tutor.avatar,
+        avatar: req.body.avatar || tutor.avatar,  
         video: req.body.video || tutor.video,
-        student_type: req.body.student_type || tutor.student_type,
         student_lvl: req.body.student_lvl || tutor.student_lvl,
+        student_type: req.body.student_type || tutor.student_type,
+        teaching_styles: JSON.stringify(req.body.teaching_styles) || tutor.teaching_styles,
         accent: req.body.accent || tutor.accent,
         fluency: req.body.fluency || tutor.fluency,
         specialities: JSON.stringify(req.body.specialities) || tutor.specialities,
@@ -259,4 +344,5 @@ exports.updateTutor = async (req, res) => {
     })
   }
 };
+
 

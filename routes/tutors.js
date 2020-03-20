@@ -9,5 +9,7 @@ router.get('/', tutorController.getAllTutors);
 router.get('/:id', tutorController.getTutor);
 router.delete('/:id', checkAuth(roles.ADMIN), tutorController.deleteTutor);
 router.put('/:id', checkAuth(), tutorController.updateTutor);
+router.post('/avatar/:username', tutorController.uploadTutorAvatar, tutorController.updateTutorAvatar);
+router.post('/certificates/:username', tutorController.uploadCertificates, tutorController.updateTutorCertificates);
 
 module.exports = router;
