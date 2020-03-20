@@ -50,6 +50,27 @@ const Tutor = connection.sequelize.define(
     },
     video: {
       type: Sequelize.TEXT
+    },
+    student_lvl: {
+      type: Sequelize.STRING(40)
+    },
+    student_type: {
+      type: Sequelize.STRING(40)
+    },
+    teaching_styles: {
+      type: Sequelize.TEXT
+    },
+    accent: {
+      type: Sequelize.STRING(40)
+    },
+    fluency: {
+      type: Sequelize.STRING(40)
+    },
+    accent: {
+      type: Sequelize.STRING(40)
+    },
+    specialities: {
+      type: Sequelize.TEXT
     }
   }, {
     indexes: [
