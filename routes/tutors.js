@@ -11,5 +11,7 @@ router.delete('/:id', checkAuth(roles.ADMIN), tutorController.deleteTutor);
 router.put('/:id', checkAuth(), tutorController.updateTutor);
 router.post('/avatar/:username', tutorController.uploadTutorAvatar, tutorController.updateTutorAvatar);
 router.post('/certificates/:username', tutorController.uploadCertificates, tutorController.updateTutorCertificates);
+router.post('/video/:username', tutorController.uploadVideo, tutorController.updateTutorVideo);
+router.get('/video/:username', tutorController.streamVideo);
 
 module.exports = router;
