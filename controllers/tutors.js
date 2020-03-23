@@ -19,30 +19,87 @@ const paginate = require('../lib/utils/sqlPaginate');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const fsExtra = require('fs-extra');
 
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    fs.mkdirSync(path.resolve(`uploads/tutors/${req.params.username}/avatar`), { recursive: true });
+    const dir = path.resolve(`uploads/tutors/${req.params.username}/avatar`);
+    if (fs.existsSync(dir)) {
+      fsExtra.emptyDirSync(dir);
+    } else {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     cb(null, `./uploads/tutors/${req.params.username}/avatar`);
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
   }
-})
+});
 
 const certificatesStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    fs.mkdirSync(path.resolve(`uploads/tutors/${req.params.username}/certificates`), { recursive: true });
+    const dir = path.resolve(`uploads/tutors/${req.params.username}/certificates`);
+    if (fs.existsSync(dir)) {
+      fsExtra.emptyDirSync(dir);
+    } else {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     cb(null, `./uploads/tutors/${req.params.username}/certificates`);
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
   }
-})
+});
+
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.resolve(`uploads/tutors/${req.params.username}/video`);
+    if (fs.existsSync(dir)) {
+      fsExtra.emptyDirSync(dir);
+    } else {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, `./uploads/tutors/${req.params.username}/video`);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
 
 exports.uploadTutorAvatar = multer({ storage: avatarStorage }).single('avatar');
 exports.uploadCertificates = multer({ storage: certificatesStorage }).array('certificates', 10);
+exports.uploadVideo = multer({ storage: videoStorage }).single('video');
 
+exports.streamVideo = async (req, res) => {
+  const videoPath = `uploads/tutors/${req.params.username}/video/introVideo.webm`;
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size
+  const range = req.headers.range
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-")
+    const start = parseInt(parts[0], 10)
+    const end = parts[1]
+      ? parseInt(parts[1], 10)
+      : fileSize - 1
+    const chunksize = (end - start) + 1
+    const file = fs.createReadStream(videoPath, { start, end })
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/webm',
+    }
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/webm',
+    }
+    res.writeHead(200, head)
+    fs.createReadStream(videoPath).pipe(res)
+  }
+}
 
 exports.updateTutorAvatar = async (req, res) => {
   try {
@@ -50,13 +107,37 @@ exports.updateTutorAvatar = async (req, res) => {
       where: { username: req.params.username }
     });
     if (account) {
-      await Tutor.update({avatar: req.file.path}, {
+      await Tutor.update({ avatar: req.file.path }, {
         where: { accountId: account.id }
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       })
-    } 
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    });
+  }
+}
+
+exports.updateTutorVideo = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: { username: req.params.username }
+    });
+    if (account) {
+      await Tutor.update({ video: req.file.path }, {
+        where: { accountId: account.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      })
+    }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
     })
@@ -77,19 +158,13 @@ exports.updateTutorCertificates = async (req, res) => {
       const tutor = await Tutor.findOne({
         where: { accountId: account.id }
       });
-      let certificates;
-      if (tutor.certificates) {
-        certificates = JSON.stringify([...JSON.parse(tutor.certificates), ...req.files]);
-      } else {
-        certificates = JSON.stringify(req.files);
-      }
-      await Tutor.update({certificates: certificates}, {
+      await Tutor.update({ certificates: JSON.stringify(req.files) }, {
         where: { accountId: account.id }
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       })
-    } 
+    }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
     })
@@ -318,7 +393,6 @@ exports.updateTutor = async (req, res) => {
         certificates: req.body.certificates || tutor.certificates,
         reason: req.body.reason || tutor.reason,
         introduction: req.body.introduction || tutor.introduction,
-        avatar: req.body.avatar || tutor.avatar,  
         video: req.body.video || tutor.video,
         student_lvl: req.body.student_lvl || tutor.student_lvl,
         student_type: req.body.student_type || tutor.student_type,

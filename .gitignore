@@ -8,3 +8,5 @@
 .env
 
 /database/config.json
+
+/uploads
