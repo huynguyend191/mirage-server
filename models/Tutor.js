@@ -66,9 +66,6 @@ const Tutor = connection.sequelize.define(
     fluency: {
       type: Sequelize.STRING(40)
     },
-    accent: {
-      type: Sequelize.STRING(40)
-    },
     specialities: {
       type: Sequelize.TEXT
     }

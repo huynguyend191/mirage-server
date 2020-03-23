@@ -9,5 +9,6 @@ router.get('/', checkAuth(roles.ADMIN), studentController.getAllStudents);
 router.get('/:id', checkAuth(), studentController.getStudent);
 router.delete('/:id', checkAuth(roles.ADMIN), studentController.deleteStudent);
 router.put('/:id', checkAuth(roles.STUDENT), studentController.updateStudent);
+router.post('/avatar/:username',checkAuth(roles.STUDENT), studentController.uploadStudentAvatar, studentController.updateStudentAvatar);
 
 module.exports = router;
