@@ -210,8 +210,9 @@ exports.createTutor = async (req, res) => {
         verification: verfication.UNVERIFIED,
         state: states.ACTIVE
       }, { transaction });
+      const tutorId = uuid();
       await Tutor.create({
-        id: uuid(),
+        id: tutorId,
         accountId: accId,
         name: req.body.name,
         profileStatus: profileStatus.PENDING
@@ -223,6 +224,9 @@ exports.createTutor = async (req, res) => {
         username: req.body.username,
         role: roles.TUTOR,
         verification: verfication.UNVERIFIED,
+        tutor: {
+          id: tutorId
+        }
       };
 
       const token = jwt.sign(responseAcc, process.env.JWT_KEY);

@@ -15,6 +15,50 @@ const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../lib/utils/sendMail');
 const paginate = require('../lib/utils/sqlPaginate');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const fsExtra = require('fs-extra');
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.resolve(`uploads/students/${req.params.username}/avatar`);
+    if (fs.existsSync(dir)) {
+      fsExtra.emptyDirSync(dir);
+    } else {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, `./uploads/students/${req.params.username}/avatar`);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+
+exports.uploadStudentAvatar = multer({ storage: avatarStorage }).single('avatar');
+exports.updateStudentAvatar = async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      where: { username: req.params.username }
+    });
+    if (account) {
+      await Student.update({ avatar: req.file.path }, {
+        where: { accountId: account.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      })
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_UPDATE
+    });
+  }
+}
 
 exports.createStudent = async (req, res) => {
   let transaction;
@@ -50,8 +94,9 @@ exports.createStudent = async (req, res) => {
         verification: verfication.UNVERIFIED,
         state: states.ACTIVE
       }, { transaction });
+      const studentId = uuid();
       await Student.create({
-        id: uuid(),
+        id: studentId,
         accountId: accId,
         name: req.body.name
       }, { transaction });
@@ -62,6 +107,9 @@ exports.createStudent = async (req, res) => {
         username: req.body.username,
         role: roles.STUDENT,
         verification: verfication.UNVERIFIED,
+        student: {
+          id: studentId
+        }
       };
 
       const token = jwt.sign(responseAcc, process.env.JWT_KEY);
@@ -91,7 +139,7 @@ exports.createStudent = async (req, res) => {
 exports.getAllStudents = async (req, res) => {
   try {
     let searchQuery = {};
-    if (req.query.search) {
+    if (req.query.search != "") {
       searchQuery = {
         [Op.or]: [
           { name: { [Op.like]: `%${req.query.search}%` } },
@@ -105,9 +153,6 @@ exports.getAllStudents = async (req, res) => {
     }
     if (req.query.verification) {
       searchQuery['$account.verification$'] = req.query.verification
-    }
-    if (req.query.profileStatus) {
-      searchQuery.profileStatus = req.query.profileStatus
     }
     const total = await Student.count({
       include: [{
@@ -149,7 +194,7 @@ exports.getStudent = async (req, res) => {
     const student = await Student.findOne({
       include: [{
         model: Account,
-        attributes: ['id', 'username', 'state', 'verification']
+        attributes: ['id', 'username', 'state', 'verification', 'email']
       }],
       where: { id: req.params.id }
     });
@@ -209,7 +254,12 @@ exports.updateStudent = async (req, res) => {
       const studentInfo = {
         name: req.body.name || student.name,
         birthdate: Date.parse(req.body.birthdate) || student.birthdate,
-        phone: req.body.phone || student.phone
+        phone: req.body.phone || student.phone,
+        student_lvl: req.body.student_lvl || student_type.student_lvl,
+        student_type: req.body.student_type || student_type.student_type,
+        teaching_styles: JSON.stringify(req.body.teaching_styles) || student_type.teaching_styles,
+        accent: req.body.accent || student_type.accent,
+        specialities: JSON.stringify(req.body.specialities) || student_type.specialities,
       }
       await Student.update(studentInfo, {
         where: { id: student.id }
