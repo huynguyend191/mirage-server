@@ -113,22 +113,19 @@ exports.verifyAccount = async (req, res) => {
       }
     });
     if (unverifiedAcc) {
-      const createTime = Date.parse(unverifiedAcc.createdAt);
-      if (createTime + expireVerify > Date.now()) {
-        await Account.update({
-          verification: verification.VERIFIED
-        }, {
-          where: {
-            email: unverifiedAcc.email
-          }
-        });
-        await UnverifiedAccount.destroy({
-          where: {
-            id: req.params.id
-          }
-        });
-        return res.redirect(process.env.CLIENT_URL + '/sign-out');
-      }
+      await Account.update({
+        verification: verification.VERIFIED
+      }, {
+        where: {
+          email: unverifiedAcc.email
+        }
+      });
+      await UnverifiedAccount.destroy({
+        where: {
+          id: req.params.id
+        }
+      });
+      return res.redirect(process.env.CLIENT_URL + '/sign-out');
     }
     return res.status(httpStatus.BAD_REQUEST).redirect(process.env.CLIENT_URL );
   } catch (error) {
