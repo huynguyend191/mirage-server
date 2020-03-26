@@ -255,11 +255,11 @@ exports.updateStudent = async (req, res) => {
         name: req.body.name || student.name,
         birthdate: Date.parse(req.body.birthdate) || student.birthdate,
         phone: req.body.phone || student.phone,
-        student_lvl: req.body.student_lvl || student_type.student_lvl,
-        student_type: req.body.student_type || student_type.student_type,
-        teaching_styles: JSON.stringify(req.body.teaching_styles) || student_type.teaching_styles,
-        accent: req.body.accent || student_type.accent,
-        specialities: JSON.stringify(req.body.specialities) || student_type.specialities,
+        student_lvl: req.body.student_lvl || student.student_lvl,
+        student_type: req.body.student_type || student.student_type,
+        teaching_styles: JSON.stringify(req.body.teaching_styles) || student.teaching_styles,
+        accent: req.body.accent || student.accent,
+        specialities: JSON.stringify(req.body.specialities) || student.specialities,
       }
       await Student.update(studentInfo, {
         where: { id: student.id }
