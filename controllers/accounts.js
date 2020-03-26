@@ -127,10 +127,10 @@ exports.verifyAccount = async (req, res) => {
       });
       return res.redirect(process.env.CLIENT_URL + '/sign-out');
     }
-    return res.status(httpStatus.BAD_REQUEST).redirect(process.env.CLIENT_URL );
+    return res.status(httpStatus.BAD_REQUEST).redirect(process.env.CLIENT_URL);
   } catch (error) {
     console.log(error);
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect(process.env.CLIENT_URL );
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).redirect(process.env.CLIENT_URL);
   }
 };
 
