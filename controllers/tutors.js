@@ -36,14 +36,18 @@ const avatarStorage = multer.diskStorage({
   }
 });
 
+exports.createDirCertificates = (req, res, next) => {
+  const dir = path.resolve(`uploads/tutors/${req.params.username}/certificates`);
+  if (fs.existsSync(dir)) {
+    fsExtra.emptyDirSync(dir);
+  } else {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  next();
+}
+
 const certificatesStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.resolve(`uploads/tutors/${req.params.username}/certificates`);
-    if (fs.existsSync(dir)) {
-      fsExtra.emptyDirSync(dir);
-    } else {
-      fs.mkdirSync(dir, { recursive: true });
-    }
     cb(null, `./uploads/tutors/${req.params.username}/certificates`);
   },
   filename: (req, file, cb) => {

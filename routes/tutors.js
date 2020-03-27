@@ -10,7 +10,7 @@ router.get('/:id', checkAuth(), tutorController.getTutor);
 router.delete('/:id', checkAuth(roles.ADMIN), tutorController.deleteTutor);
 router.put('/:id', checkAuth(), tutorController.updateTutor);
 router.post('/avatar/:username',checkAuth(roles.TUTOR), tutorController.uploadTutorAvatar, tutorController.updateTutorAvatar);
-router.post('/certificates/:username', checkAuth(roles.TUTOR), tutorController.uploadCertificates, tutorController.updateTutorCertificates);
+router.post('/certificates/:username', checkAuth(roles.TUTOR), tutorController.createDirCertificates ,tutorController.uploadCertificates, tutorController.updateTutorCertificates);
 router.post('/video/:username', checkAuth(roles.TUTOR), tutorController.uploadVideo, tutorController.updateTutorVideo);
 router.get('/video/:username', checkAuth(), tutorController.streamVideo);
 
