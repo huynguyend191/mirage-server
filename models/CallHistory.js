@@ -4,6 +4,10 @@ const Student = require('./Student');
 const Sequelize = require('sequelize');
 
 const CallHistory = connection.sequelize.define('call_history', {
+  id: {
+    type: Sequelize.UUID,
+    primaryKey: true
+  },
   duration: {
     type: Sequelize.INTEGER
   }
