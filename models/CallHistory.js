@@ -12,7 +12,7 @@ const CallHistory = connection.sequelize.define('call_history', {
     type: Sequelize.INTEGER
   }
 });
-Student.belongsToMany(Tutor, { through: CallHistory });
-Tutor.belongsToMany(Student, { through: CallHistory });
+Student.belongsToMany(Tutor, { through: { model: CallHistory, unique: false } });
+Tutor.belongsToMany(Student, { through: { model: CallHistory, unique: false } });
 
 module.exports = CallHistory;
