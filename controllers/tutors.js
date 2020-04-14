@@ -32,7 +32,7 @@ const avatarStorage = multer.diskStorage({
     cb(null, `./uploads/tutors/${req.params.username}/avatar`);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, 'avatar.png');
   }
 });
 
