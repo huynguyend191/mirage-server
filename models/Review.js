@@ -3,26 +3,20 @@ const Tutor = require('./Tutor');
 const Student = require('./Student');
 const Sequelize = require('sequelize');
 
-const CallHistory = connection.sequelize.define('call_history', {
+const Review = connection.sequelize.define('review', {
   id: {
     type: Sequelize.UUID,
     primaryKey: true
   },
-  duration: {
-    type: Sequelize.INTEGER
-  },
-  studentVideo: {
+  comment: {
     type: Sequelize.STRING
   },
-  tutorVideo: {
-    type: Sequelize.STRING
+  rating: {
+    type: Sequelize.INTEGER,
+    defaultValue: 0
   }
 });
 Student.belongsToMany(Tutor, { through: { model: CallHistory, unique: false } });
 Tutor.belongsToMany(Student, { through: { model: CallHistory, unique: false } });
-Student.hasMany(CallHistory);
-CallHistory.belongsTo(Student);
-Tutor.hasMany(CallHistory);
-CallHistory.belongsTo(Tutor);
 
-module.exports = CallHistory;
+module.exports = Review;
