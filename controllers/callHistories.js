@@ -30,15 +30,15 @@ exports.uploadCallVideos = multer({ storage: callHistoryStorage }).array('videos
 
 exports.createCallHistory = async (req, res) => {
   try {
-    console.log(req.callId)
-    // await CallHistory.create({
-    //   id: req.body.id,
-    //   tutorId: req.body.tutorId,
-    //   studentId: req.body.studentId,
-    //   duration: req.body.duration,
-    //   studentVideo: `/uploads/callHistories/${req.body.id}/student.wemb`,
-    //   tutorVideo: `/uploads/callHistories/${req.body.id}/tutor.wemb`
-    // });
+    console.log(req.body)
+    await CallHistory.create({
+      id: req.callId,
+      tutorId: req.body.tutorId,
+      studentId: req.body.studentId,
+      duration: req.body.duration,
+      studentVideo: `/uploads/callHistories/${req.callId}/student.wemb`,
+      tutorVideo: `/uploads/callHistories/${req.callId}/tutor.wemb`
+    });
     return res.status(httpStatus.OK).json({
       message: msg.MSG_SUCCESS
     })
