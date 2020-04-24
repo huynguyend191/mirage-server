@@ -30,7 +30,6 @@ exports.uploadCallVideos = multer({ storage: callHistoryStorage }).array('videos
 
 exports.createCallHistory = async (req, res) => {
   try {
-    console.log(req.body)
     await CallHistory.create({
       id: req.callId,
       tutorId: req.body.tutorId,
