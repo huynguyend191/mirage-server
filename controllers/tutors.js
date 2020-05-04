@@ -20,6 +20,8 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const fsExtra = require('fs-extra');
+const Review = require('../models/Review');
+const Sequelize =  require('sequelize');
 
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -320,9 +322,22 @@ exports.getTutor = async (req, res) => {
         model: Account,
         attributes: ['id', 'username', 'state', 'verification', 'email']
       }],
+      nest: true,
+      raw: true,
       where: { id: req.params.id }
     });
     if (tutor) {
+      const review = await Review.findAll({
+        where: {
+          tutorId: tutor.id,
+        },
+        attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'], [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']],
+        raw: true,
+      });
+      tutor.review = {
+        avg: review[0].avg,
+        count: review[0].count,
+      }
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
         tutor: tutor

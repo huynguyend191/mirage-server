@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const msg = require('../lib/constants/messages');
 const constants = require('../lib/constants/common');
 const verification = require('../lib/constants/account').VERIFICATION;
-const expireVerify = require('../lib/constants/emailInfo').VERIFY_MAIL_EXPIRE;
 const state = require('../lib/constants/account').STATES;
 const httpStatus = require('http-status-codes');
 const generatePass = require('generate-password');
@@ -39,12 +38,12 @@ exports.signIn = async (req, res) => {
         }
         if (account.role === ROLES.TUTOR) {
           const tutor = await Tutor.findOne({
-            where: { accountId: account.id}
+            where: { accountId: account.id }
           });
           resAcc.tutor = tutor;
         } else if (account.role === ROLES.STUDENT) {
           const student = await Student.findOne({
-            where: { accountId: account.id}
+            where: { accountId: account.id }
           });
           resAcc.student = student;
         }
@@ -144,7 +143,7 @@ exports.resetPassword = async (req, res) => {
             { email: req.body.user }
           ],
           state: state.ACTIVE,
-          role: { [Op.not]: ROLES.ADMIN}
+          role: { [Op.not]: ROLES.ADMIN }
         }
       });
       if (account) {
