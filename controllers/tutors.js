@@ -260,7 +260,7 @@ exports.createTutor = async (req, res) => {
 exports.getAllTutors = async (req, res) => {
   try {
     let searchQuery = {};
-    if (req.query.search) {
+    if (req.query.search && req.query.search != "") {
       searchQuery = {
         [Op.or]: [
           { name: { [Op.like]: `%${req.query.search}%` } },
