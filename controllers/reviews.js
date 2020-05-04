@@ -49,18 +49,18 @@ exports.getTutorReviews = async (req, res) => {
           tutorId: req.params.tutorId
         }
       });
-      const avg = await Review.findAll({
+      const overview = await Review.findAll({
         where: {
           tutorId: req.params.tutorId,
         },
-        attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg']],
+        attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'], [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']],
         raw: true,
       });
-      console.log(avg)
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
         reviews: reviews,
-        avg: avg[0].avg
+        avg: overview[0].avg,
+        count: overview[0].count,
       })
     };
     return res.status(httpStatus.NOT_FOUND).json({
