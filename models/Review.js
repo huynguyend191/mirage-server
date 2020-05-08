@@ -18,5 +18,9 @@ const Review = connection.sequelize.define('review', {
 });
 Student.belongsToMany(Tutor, { through: { model: Review, unique: false } });
 Tutor.belongsToMany(Student, { through: { model: Review, unique: false } });
+Student.hasMany(Review);
+Review.belongsTo(Student);
+Tutor.hasMany(Review);
+Review.belongsTo(Tutor);
 
 module.exports = Review;

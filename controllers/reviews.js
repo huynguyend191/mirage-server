@@ -1,4 +1,5 @@
 const Review = require('../models/Review');
+const Student = require('../models/Student');
 const Tutor = require('../models/Tutor');
 const uuid = require('uuid').v4;
 const { validateIntNumber, validateString } = require('../lib/utils/validateData')
@@ -47,7 +48,16 @@ exports.getTutorReviews = async (req, res) => {
       const reviews = await Review.findAll({
         where: {
           tutorId: req.params.tutorId
-        }
+        },
+        include: [
+          {
+            model: Student,
+            attributes: ['name', 'avatar']
+          }
+        ],
+        order: [
+          ['createdAt', 'DESC']
+        ]
       });
       const overview = await Review.findAll({
         where: {
@@ -70,6 +80,30 @@ exports.getTutorReviews = async (req, res) => {
     console.log(error)
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
+    })
+  }
+}
+
+exports.deleteReview = async (req, res) => {
+  try {
+    const review = await Review.findOne({
+      where: { id: req.params.id }
+    });
+    if (review) {
+      await Review.destroy({
+        where: { id: review.id }
+      });
+      return res.status(httpStatus.OK).json({
+        message: msg.MSG_SUCCESS
+      });
+    }
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_DELETE
     })
   }
 }
