@@ -3,7 +3,7 @@ const Tutor = require('./Tutor');
 const Student = require('./Student');
 const Sequelize = require('sequelize');
 
-const Review = connection.sequelize.define('review', {
+const Review = connection.sequelize.define('reviews', {
   id: {
     type: Sequelize.UUID,
     primaryKey: true

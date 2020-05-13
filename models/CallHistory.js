@@ -9,7 +9,7 @@ const CallHistory = connection.sequelize.define('call_history', {
     primaryKey: true
   },
   duration: {
-    type: Sequelize.INTEGER
+    type: Sequelize.INTEGER //milliseconds
   },
   studentVideo: {
     type: Sequelize.STRING
