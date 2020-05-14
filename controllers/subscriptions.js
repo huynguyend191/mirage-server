@@ -81,14 +81,46 @@ exports.updateStudentSubscription = async (req, res) => {
         id: req.params.id
       }
     });
+    if (!validateIntNumber(req.body.state) || req.body.state < 1 || req.body.state > 3) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: msg.MSG_FAIL_TO_UPDATE,
+      });
+    }
     if (subscription) {
+      await Subscription.update({
+        state: req.body.state
+      }, {
+        where: {
+          id: req.params.id
+        }
+      });
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS,
-        subscriptions: subscriptions
+        message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: msg.MSG_FAIL_TO_READ
+    });
+  }
+}
+
+exports.getAllSubscriptions = async (req, res) => {
+  let searchQuery = null;
+  if (req.query.state) {
+    searchQuery = {state: req.query.state}
+  }
+  try {
+    const subscriptions = await Subscription.findAll({
+      where: searchQuery
+    });
+    return res.status(httpStatus.OK).json({
+      message: msg.MSG_SUCCESS,
+      subscriptions: subscriptions
     });
   } catch (error) {
     console.log(error);

@@ -6,5 +6,7 @@ const roles = require('../lib/constants/account').ROLES;
 
 router.post('/', subscriptionController.createSubscription);
 router.get('/:studentId', subscriptionController.getStudentSubscriptions);
+router.put('/:id', subscriptionController.updateStudentSubscription);
+router.get('/', subscriptionController.getAllSubscriptions);
 
 module.exports = router;
