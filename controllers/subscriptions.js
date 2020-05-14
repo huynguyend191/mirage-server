@@ -3,7 +3,7 @@ const Student = require('../models/Student');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
-const { SUBSCRIPTION_STATE } = require('../lib/constants/account');
+const { STATE, TYPE, DISCOUNT_RATE, DOLLAR_PER_MIN } = require('../lib/constants/subscriptions');
 const uuid = require('uuid').v4;
 
 exports.createSubscription = async (req, res) => {
@@ -24,11 +24,31 @@ exports.createSubscription = async (req, res) => {
       });
     }
     if (student) {
+      const rawPrice = (req.body.duration / 60000) * PRICE_PER_MIN;
+      let price;
+      switch (req.body.type) {
+        case TYPE.NORMAL:
+          price = rawPrice * DISCOUNT_RATE.NORMAL;
+          break;
+        case TYPE.SILVER:
+          price = rawPrice * DISCOUNT_RATE.SILVER;
+          break;
+        case TYPE.GOLD:
+          price = rawPrice * DISCOUNT_RATE.GOLD;
+          break;
+        case TYPE.PLATIUM:
+          price = rawPrice * DISCOUNT_RATE.PLATIUM;
+          break;
+        default:
+          break;
+      }
       await Subscription.create({
         id: uuid(),
         duration: req.body.duration,
-        state: SUBSCRIPTION_STATE.PENDING,
-        studentId: student.id
+        state: STATE.PENDING,
+        studentId: student.id,
+        price: price,
+        type: req.body.type
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
@@ -112,7 +132,7 @@ exports.updateStudentSubscription = async (req, res) => {
 exports.getAllSubscriptions = async (req, res) => {
   let searchQuery = null;
   if (req.query.state) {
-    searchQuery = {state: req.query.state}
+    searchQuery = { state: req.query.state }
   }
   try {
     const subscriptions = await Subscription.findAll({

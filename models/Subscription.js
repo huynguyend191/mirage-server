@@ -13,6 +13,12 @@ const Subscription = connection.sequelize.define(
     },
     state: {
       type: Sequelize.INTEGER
+    },
+    price: {
+      type: Sequelize.FLOAT 
+    },
+    type: {
+      type: Sequelize.INTEGER
     }
   },
 );
