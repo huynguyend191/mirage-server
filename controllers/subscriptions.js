@@ -1,5 +1,6 @@
 const Subscription = require('../models/Subscription');
 const Student = require('../models/Student');
+const Account = require('../models/Account');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
@@ -142,6 +143,12 @@ exports.getAllSubscriptions = async (req, res) => {
       where: searchQuery,
       order: [
         ['createdAt', 'DESC']
+      ],
+      include: [
+        { 
+          model: Student, 
+          include: [Account]
+        }
       ]
     });
     return res.status(httpStatus.OK).json({

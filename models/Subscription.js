@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const connection = require('../database/connection');
+const Student = require('./Student');
 
 const Subscription = connection.sequelize.define(
   'subscriptions',
@@ -22,5 +23,7 @@ const Subscription = connection.sequelize.define(
     }
   },
 );
+
+Subscription.belongsTo(Student);
 
 module.exports = Subscription;
