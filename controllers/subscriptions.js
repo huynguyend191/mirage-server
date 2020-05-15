@@ -3,7 +3,7 @@ const Student = require('../models/Student');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
-const { STATE, TYPE, DISCOUNT_RATE, DOLLAR_PER_MIN } = require('../lib/constants/subscriptions');
+const { STATE, TIER, DISCOUNT_RATE, PRICE_PER_MIN } = require('../lib/constants/subscriptions');
 const uuid = require('uuid').v4;
 
 exports.createSubscription = async (req, res) => {
@@ -26,17 +26,17 @@ exports.createSubscription = async (req, res) => {
     if (student) {
       const rawPrice = (req.body.duration / 60000) * PRICE_PER_MIN;
       let price;
-      switch (req.body.type) {
-        case TYPE.NORMAL:
+      switch (req.body.tier) {
+        case TIER.NORMAL:
           price = rawPrice * DISCOUNT_RATE.NORMAL;
           break;
-        case TYPE.SILVER:
+        case TIER.SILVER:
           price = rawPrice * DISCOUNT_RATE.SILVER;
           break;
-        case TYPE.GOLD:
+        case TIER.GOLD:
           price = rawPrice * DISCOUNT_RATE.GOLD;
           break;
-        case TYPE.PLATIUM:
+        case TIER.PLATIUM:
           price = rawPrice * DISCOUNT_RATE.PLATIUM;
           break;
         default:
@@ -47,8 +47,8 @@ exports.createSubscription = async (req, res) => {
         duration: req.body.duration,
         state: STATE.PENDING,
         studentId: student.id,
-        price: price,
-        type: req.body.type
+        price: price.toFixed(2),
+        tier: req.body.tier
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
@@ -76,7 +76,10 @@ exports.getStudentSubscriptions = async (req, res) => {
       const subscriptions = await Subscription.findAll({
         where: {
           studentId: student.id
-        }
+        },
+        order: [
+          ['createdAt', 'DESC']
+        ]
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
@@ -136,7 +139,10 @@ exports.getAllSubscriptions = async (req, res) => {
   }
   try {
     const subscriptions = await Subscription.findAll({
-      where: searchQuery
+      where: searchQuery,
+      order: [
+        ['createdAt', 'DESC']
+      ]
     });
     return res.status(httpStatus.OK).json({
       message: msg.MSG_SUCCESS,

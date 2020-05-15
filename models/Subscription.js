@@ -17,7 +17,7 @@ const Subscription = connection.sequelize.define(
     price: {
       type: Sequelize.FLOAT 
     },
-    type: {
+    tier: {
       type: Sequelize.INTEGER
     }
   },
