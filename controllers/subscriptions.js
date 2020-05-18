@@ -6,6 +6,7 @@ const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
 const { STATE, TIER, DISCOUNT_RATE, PRICE_PER_MIN } = require('../lib/constants/subscriptions');
 const uuid = require('uuid').v4;
+const connection = require('../database/connection');
 
 exports.createSubscription = async (req, res) => {
   try {
@@ -99,6 +100,7 @@ exports.getStudentSubscriptions = async (req, res) => {
 }
 
 exports.updateStudentSubscription = async (req, res) => {
+  let transaction;
   try {
     const subscription = await Subscription.findOne({
       where: {
@@ -111,22 +113,49 @@ exports.updateStudentSubscription = async (req, res) => {
       });
     }
     if (subscription) {
-      await Subscription.update({
-        state: req.body.state
-      }, {
-        where: {
-          id: req.params.id
-        }
-      });
-      return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS
-      });
+      if (req.body.state !== STATE.COMPLETED) {
+        await Subscription.update({
+          state: req.body.state
+        }, {
+          where: {
+            id: req.params.id
+          }
+        });
+        return res.status(httpStatus.OK).json({
+          message: msg.MSG_SUCCESS
+        });
+      } else {
+        const student = await Student.findOne({
+          where: { id: subscription.studentId }
+        })
+        const newTime = student.remaining_time + subscription.duration;
+        transaction = await connection.sequelize.transaction();
+        await Subscription.update({
+          state: req.body.state
+        }, {
+          where: {
+            id: req.params.id
+          }
+        }, { transaction });
+        await Student.update({
+          remaining_time: newTime
+        }, {
+          where: {
+            id: student.id
+          }
+        }, { transaction });
+        await transaction.commit();
+        return res.status(httpStatus.OK).json({
+          message: msg.MSG_SUCCESS
+        });
+      }
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND,
     });
   } catch (error) {
     console.log(error);
+    if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
     });

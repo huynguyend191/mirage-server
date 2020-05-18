@@ -37,7 +37,8 @@ const Student = connection.sequelize.define(
       type: Sequelize.TEXT
     },
     remaining_time: {
-      type: Sequelize.INTEGER //milliseconds
+      type: Sequelize.INTEGER, //milliseconds
+      defaultValue: 0
     }
   }, {
     indexes: [
