@@ -115,7 +115,8 @@ exports.createStudent = async (req, res) => {
       const token = jwt.sign(responseAcc, process.env.JWT_KEY);
       res.cookie(constants.ACCESS_TOKEN, token, {
         expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
-        overwrite: true
+        overwrite: true,
+        sameSite: 'None'
       });
 
       sendMail.verifyMail(req.body.email);

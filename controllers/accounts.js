@@ -50,7 +50,8 @@ exports.signIn = async (req, res) => {
         const token = jwt.sign(resAcc, process.env.JWT_KEY);
         res.cookie(constants.ACCESS_TOKEN, token, {
           expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
-          overwrite: true
+          overwrite: true,
+          sameSite: 'None'
         });
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS,
