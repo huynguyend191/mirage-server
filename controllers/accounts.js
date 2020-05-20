@@ -51,7 +51,8 @@ exports.signIn = async (req, res) => {
         res.cookie(constants.ACCESS_TOKEN, token, {
           expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
           overwrite: true,
-          sameSite: 'None'
+          sameSite: 'None',
+          secure: true
         });
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS,

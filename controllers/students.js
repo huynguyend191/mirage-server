@@ -116,7 +116,8 @@ exports.createStudent = async (req, res) => {
       res.cookie(constants.ACCESS_TOKEN, token, {
         expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
         overwrite: true,
-        sameSite: 'None'
+        sameSite: 'None',
+        secure: true
       });
 
       sendMail.verifyMail(req.body.email);
