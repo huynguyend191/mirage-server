@@ -1,5 +1,7 @@
 const Account = require('../models/Account');
 const Tutor = require('../models/Tutor');
+const Student = require('../models/Student');
+const CallHistory = require('../models/CallHistory');
 const bcrypt = require('bcrypt');
 const connection = require('../database/connection');
 const uuid = require('uuid').v4;
@@ -323,26 +325,46 @@ exports.getTutor = async (req, res) => {
       include: [{
         model: Account,
         attributes: ['id', 'username', 'state', 'verification', 'email']
-      }],
-      nest: true,
-      raw: true,
+      },
+      {
+        model: CallHistory,
+        include: [
+          { 
+            model: Student, 
+            include: [{
+              model: Account,
+              attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'name']
+          },
+          { 
+            model: Tutor, 
+            include: [{
+              model: Account,
+              attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'name']
+          }
+        ]
+      }
+      ],
       where: { id: req.params.id }
     });
     if (tutor) {
       const review = await Review.findAll({
         where: {
-          tutorId: tutor.id,
+          tutorId: req.params.id,
         },
         attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'], [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']],
         raw: true,
       });
-      tutor.review = {
+      tutor.dataValues.review = {
         avg: review[0].avg,
         count: review[0].count,
       }
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
-        tutor: tutor
+        tutor: tutor.dataValues
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({

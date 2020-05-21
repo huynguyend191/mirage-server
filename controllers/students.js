@@ -1,5 +1,8 @@
 const Account = require('../models/Account');
 const Student = require('../models/Student');
+const Tutor = require('../models/Tutor');
+const Subscription = require('../models/Subscription');
+const CallHistory = require('../models/CallHistory');
 const bcrypt = require('bcrypt');
 const connection = require('../database/connection');
 const uuid = require('uuid').v4;
@@ -197,7 +200,32 @@ exports.getStudent = async (req, res) => {
       include: [{
         model: Account,
         attributes: ['id', 'username', 'state', 'verification', 'email']
-      }],
+      },
+      {
+        model: Subscription
+      },
+      {
+        model: CallHistory,
+        include: [
+          { 
+            model: Student, 
+            include: [{
+              model: Account,
+              attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'name']
+          },
+          { 
+            model: Tutor, 
+            include: [{
+              model: Account,
+              attributes: ['id', 'username']
+            }],
+            attributes: ['id', 'name']
+          }
+        ]
+      }
+      ],
       where: { id: req.params.id }
     });
     if (student) {

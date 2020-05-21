@@ -176,7 +176,10 @@ exports.getAllSubscriptions = async (req, res) => {
       include: [
         { 
           model: Student, 
-          include: [Account]
+          include: [{
+            model: Account,
+            attributes: ['id', 'username']
+          }]
         }
       ]
     });

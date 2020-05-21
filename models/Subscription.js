@@ -25,5 +25,6 @@ const Subscription = connection.sequelize.define(
 );
 
 Subscription.belongsTo(Student);
+Student.hasMany(Subscription);
 
 module.exports = Subscription;
