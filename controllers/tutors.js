@@ -24,6 +24,7 @@ const path = require('path');
 const fsExtra = require('fs-extra');
 const Review = require('../models/Review');
 const Sequelize =  require('sequelize');
+const streamVideoFromPath = require('../lib/utils/streamVideoFromPath');
 
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -80,33 +81,7 @@ exports.uploadVideo = multer({ storage: videoStorage }).single('video');
 
 exports.streamVideo = async (req, res) => {
   const videoPath = `uploads/tutors/${req.params.username}/video/introVideo.webm`;
-  const stat = fs.statSync(videoPath);
-  const fileSize = stat.size
-  const range = req.headers.range
-  if (range) {
-    const parts = range.replace(/bytes=/, "").split("-")
-    const start = parseInt(parts[0], 10)
-    const end = parts[1]
-      ? parseInt(parts[1], 10)
-      : fileSize - 1
-    const chunksize = (end - start) + 1
-    const file = fs.createReadStream(videoPath, { start, end })
-    const head = {
-      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunksize,
-      'Content-Type': 'video/webm',
-    }
-    res.writeHead(206, head);
-    file.pipe(res);
-  } else {
-    const head = {
-      'Content-Length': fileSize,
-      'Content-Type': 'video/webm',
-    }
-    res.writeHead(200, head)
-    fs.createReadStream(videoPath).pipe(res)
-  }
+  streamVideoFromPath(req, res, videoPath);
 }
 
 exports.updateTutorAvatar = async (req, res) => {

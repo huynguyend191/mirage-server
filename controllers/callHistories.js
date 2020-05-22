@@ -6,6 +6,7 @@ const Op = require('sequelize').Op;
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const uuid = require('uuid').v4;
+const streamVideoFromPath = require('../lib/utils/streamVideoFromPath');
 
 exports.getCallHistories = async (req, res) => {
   try {
@@ -42,4 +43,14 @@ exports.getCallHistories = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
+}
+
+exports.getTutorRecord = async (req, res) => {
+  const videoPath = `uploads/callHistories/${req.params.id}/tutor.webm`;
+  streamVideoFromPath(req, res, videoPath);
+}
+
+exports.getStudenRecord = async (req, res) => {
+  const videoPath =  `uploads/callHistories/${req.params.id}/student.webm`;
+  streamVideoFromPath(req, res, videoPath);
 }
