@@ -12,6 +12,8 @@ const studentRoutes = require('./routes/students');
 const callHistoryRoutes = require('./routes/callHistories');
 const reviewRoutes = require('./routes/reviews');
 const subscriptionRoutes = require('./routes/subscriptions');
+const reportRoutes = require('./routes/reports');
+const preferenceRoutes = require('./routes/preferences.js');
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -30,7 +32,8 @@ app.use('/api/students', studentRoutes);
 app.use('/api/call-histories', callHistoryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
-
+app.use('/api/reports', reportRoutes);
+app.use('/api/preferences', preferenceRoutes);
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 

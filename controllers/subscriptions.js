@@ -157,15 +157,18 @@ exports.updateStudentSubscription = async (req, res) => {
     console.log(error);
     if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: msg.MSG_FAIL_TO_READ
+      message: msg.MSG_FAIL_TO_UPDATE
     });
   }
 }
 
 exports.getAllSubscriptions = async (req, res) => {
-  let searchQuery = null;
+  let searchQuery = {};
   if (req.query.state) {
-    searchQuery = { state: req.query.state }
+    searchQuery.state = req.query.state
+  }
+  if (req.query.tier) {
+    searchQuery.tier = req.query.tier
   }
   try {
     const subscriptions = await Subscription.findAll({
