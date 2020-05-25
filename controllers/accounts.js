@@ -48,8 +48,12 @@ exports.signIn = async (req, res) => {
           resAcc.student = student;
         }
         const token = jwt.sign(resAcc, process.env.JWT_KEY);
+        let expireTime = constants.NO_REMEMBER_TOKEN_EXPIRES
+        if (req.body.remember) {
+          expireTime = constants.REMEMBER_TOKEN_EXPIRES
+        }
         res.cookie(constants.ACCESS_TOKEN, token, {
-          expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
+          expires: new Date(Date.now() + expireTime),
           overwrite: true,
           sameSite: 'None',
           secure: true

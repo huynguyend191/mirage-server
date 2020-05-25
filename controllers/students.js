@@ -117,7 +117,7 @@ exports.createStudent = async (req, res) => {
 
       const token = jwt.sign(responseAcc, process.env.JWT_KEY);
       res.cookie(constants.ACCESS_TOKEN, token, {
-        expires: new Date(Date.now() + constants.TOKEN_EXPIRES),
+        expires: new Date(Date.now() + constants.REMEMBER_TOKEN_EXPIRES),
         overwrite: true,
         sameSite: 'None',
         secure: true
