@@ -5,10 +5,26 @@ const Account = require('../models/Account');
 const Op = require('sequelize').Op;
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
-const uuid = require('uuid').v4;
 const streamVideoFromPath = require('../lib/utils/streamVideoFromPath');
 
 exports.getCallHistories = async (req, res) => {
+  let searchQuery = {};
+  if (req.query.search && req.query.search != "") {
+    searchQuery = {
+      [Op.or]: [
+        { '$tutor.name$': { [Op.like]: `%${req.query.search}%` } },
+        { '$tutor.account.username$': { [Op.like]: `%${req.query.search}%` } },
+        { '$student.name$': { [Op.like]: `%${req.query.search}%` } },
+        { '$student.account.username$': { [Op.like]: `%${req.query.search}%` } },
+      ]
+    }
+  }
+  if (req.query.tutorId) {
+    searchQuery.tutorId = req.query.tutorId
+  }
+  if (req.query.studentId) {
+    searchQuery.studentId = req.query.studentId
+  }
   try {
     const callHistories = await CallHistory.findAll({
       order: [
@@ -31,7 +47,8 @@ exports.getCallHistories = async (req, res) => {
           }],
           attributes: ['id', 'name']
         }
-      ]
+      ],
+      where: searchQuery
     });
     return res.status(httpStatus.OK).json({
       message: msg.MSG_SUCCESS,
