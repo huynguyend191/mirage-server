@@ -45,23 +45,26 @@ exports.updateStudentAvatar = async (req, res) => {
       where: { username: req.params.username }
     });
     if (account) {
-      await Student.update({ avatar: req.file.path }, {
-        where: { accountId: account.id }
-      });
+      await Student.update(
+        { avatar: req.file.path },
+        {
+          where: { accountId: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
-      })
+      });
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
     });
   }
-}
+};
 
 exports.createStudent = async (req, res) => {
   let transaction;
@@ -74,10 +77,7 @@ exports.createStudent = async (req, res) => {
     ) {
       const existAcc = await Account.findOne({
         where: {
-          [Op.or]: [
-            { username: req.body.username },
-            { email: req.body.email }
-          ]
+          [Op.or]: [{ username: req.body.username }, { email: req.body.email }]
         }
       });
       if (existAcc) {
@@ -88,21 +88,27 @@ exports.createStudent = async (req, res) => {
       transaction = await connection.sequelize.transaction();
       const hashPassword = bcrypt.hashSync(req.body.password, parseInt(process.env.SALT_ROUND));
       const accId = uuid();
-      await Account.create({
-        id: accId,
-        username: req.body.username,
-        password: hashPassword,
-        email: req.body.email,
-        role: roles.STUDENT,
-        verification: verfication.UNVERIFIED,
-        state: states.ACTIVE
-      }, { transaction });
+      await Account.create(
+        {
+          id: accId,
+          username: req.body.username,
+          password: hashPassword,
+          email: req.body.email,
+          role: roles.STUDENT,
+          verification: verfication.UNVERIFIED,
+          state: states.ACTIVE
+        },
+        { transaction }
+      );
       const studentId = uuid();
-      await Student.create({
-        id: studentId,
-        accountId: accId,
-        name: req.body.name
-      }, { transaction });
+      await Student.create(
+        {
+          id: studentId,
+          accountId: accId,
+          name: req.body.name
+        },
+        { transaction }
+      );
       await transaction.commit();
 
       const responseAcc = {
@@ -144,26 +150,28 @@ exports.createStudent = async (req, res) => {
 exports.getAllStudents = async (req, res) => {
   try {
     let searchQuery = {};
-    if (req.query.search && req.query.search != "") {
+    if (req.query.search && req.query.search != '') {
       searchQuery = {
         [Op.or]: [
           { name: { [Op.like]: `%${req.query.search}%` } },
           { '$account.email$': { [Op.like]: `%${req.query.search}%` } },
-          { '$account.username$': { [Op.like]: `%${req.query.search}%` } },
+          { '$account.username$': { [Op.like]: `%${req.query.search}%` } }
         ]
-      }
+      };
     }
     if (req.query.state) {
-      searchQuery['$account.state$'] = req.query.state
+      searchQuery['$account.state$'] = req.query.state;
     }
     if (req.query.verification) {
-      searchQuery['$account.verification$'] = req.query.verification
+      searchQuery['$account.verification$'] = req.query.verification;
     }
     const total = await Student.count({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'email', 'state', 'verification']
-      }],
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'email', 'state', 'verification']
+        }
+      ],
       attributes: ['id', 'name'],
       where: searchQuery
     });
@@ -171,10 +179,12 @@ exports.getAllStudents = async (req, res) => {
     const pageSize = req.query.size || total;
     const totalPages = Math.ceil(total / pageSize);
     const students = await Student.findAll({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'email', 'state', 'verification']
-      }],
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'email', 'state', 'verification']
+        }
+      ],
       attributes: ['id', 'name'],
       where: searchQuery,
       ...paginate({ page, pageSize })
@@ -185,46 +195,50 @@ exports.getAllStudents = async (req, res) => {
       totalResults: total,
       totalPages: totalPages
     });
-  }
-  catch (error) {
-    console.log(error)
+  } catch (error) {
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
-    })
+    });
   }
 };
 
 exports.getStudent = async (req, res) => {
   try {
     const student = await Student.findOne({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'state', 'verification', 'email']
-      },
-      {
-        model: Subscription
-      },
-      {
-        model: CallHistory,
-        include: [
-          { 
-            model: Student, 
-            include: [{
-              model: Account,
-              attributes: ['id', 'username']
-            }],
-            attributes: ['id', 'name']
-          },
-          { 
-            model: Tutor, 
-            include: [{
-              model: Account,
-              attributes: ['id', 'username']
-            }],
-            attributes: ['id', 'name']
-          }
-        ]
-      }
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'state', 'verification', 'email']
+        },
+        {
+          model: Subscription
+        },
+        {
+          model: CallHistory,
+          include: [
+            {
+              model: Student,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
+              attributes: ['id', 'name']
+            },
+            {
+              model: Tutor,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
+              attributes: ['id', 'name']
+            }
+          ]
+        }
       ],
       where: { id: req.params.id }
     });
@@ -235,13 +249,13 @@ exports.getStudent = async (req, res) => {
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
-    })
+    });
   }
 };
 
@@ -253,29 +267,40 @@ exports.deleteStudent = async (req, res) => {
     });
     if (student) {
       transaction = await connection.sequelize.transaction();
-      await Account.destroy({
-        where: { id: student.accountId }
-      }, { transaction });
-      await Student.destroy({
-        where: { id: student.id }
-      }, { transaction });
+      await Account.destroy(
+        {
+          where: { id: student.accountId }
+        },
+        { transaction }
+      );
+      await Student.destroy(
+        {
+          where: { id: student.id }
+        },
+        { transaction }
+      );
       await transaction.commit();
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
-    })
+    });
   }
 };
 
 exports.updateStudent = async (req, res) => {
+  if (req.role != roles.ADMIN && req.params.id !== req.user.student.id) {
+    return res.status(httpStatus.FORBIDDEN).json({
+      message: msg.MSG_FORBIDDEN
+    });
+  }
   try {
     const student = await Student.findOne({
       where: { id: req.params.id }
@@ -289,22 +314,22 @@ exports.updateStudent = async (req, res) => {
         student_type: req.body.student_type || student.student_type,
         teaching_styles: JSON.stringify(req.body.teaching_styles) || student.teaching_styles,
         accent: req.body.accent || student.accent,
-        specialities: JSON.stringify(req.body.specialities) || student.specialities,
-      }
+        specialities: JSON.stringify(req.body.specialities) || student.specialities
+      };
       await Student.update(studentInfo, {
         where: { id: student.id }
       });
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS,
+        message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
-    })
+    });
   }
 };

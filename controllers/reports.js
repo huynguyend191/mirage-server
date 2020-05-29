@@ -10,11 +10,10 @@ const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 const { REPORT_STATE, STATES } = require('../lib/constants/account');
 
-
 exports.createReport = async (req, res) => {
   if (!validateString(req.body.reason)) {
     return res.status(httpStatus.BAD_REQUEST).json({
-      message: msg.MSG_FAIL_TO_CREATE,
+      message: msg.MSG_FAIL_TO_CREATE
     });
   }
   try {
@@ -27,7 +26,7 @@ exports.createReport = async (req, res) => {
       state: REPORT_STATE.PENDING
     });
     return res.status(httpStatus.OK).json({
-      message: msg.MSG_SUCCESS,
+      message: msg.MSG_SUCCESS
     });
   } catch (error) {
     console.log(error);
@@ -35,32 +34,34 @@ exports.createReport = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};
 
 exports.getReports = async (req, res) => {
   try {
     const reports = await Report.findAll({
-      order: [
-        ['createdAt', 'DESC']
-      ],
+      order: [['createdAt', 'DESC']],
       include: [
-        { 
+        {
           model: CallHistory,
           include: [
-            { 
-              model: Student, 
-              include: [{
-                model: Account,
-                attributes: ['id', 'username']
-              }],
+            {
+              model: Student,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
               attributes: ['id', 'name']
             },
-            { 
-              model: Tutor, 
-              include: [{
-                model: Account,
-                attributes: ['id', 'username']
-              }],
+            {
+              model: Tutor,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
               attributes: ['id', 'name']
             }
           ]
@@ -81,13 +82,13 @@ exports.getReports = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};
 
 exports.updateReport = async (req, res) => {
   if (!validateIntNumber(req.body.state)) {
     return res.status(httpStatus.BAD_REQUEST).json({
       message: msg.MSG_FAIL_TO_UPDATE
-    })
+    });
   }
   let transaction;
   try {
@@ -98,32 +99,43 @@ exports.updateReport = async (req, res) => {
     });
     if (report) {
       if (req.body.state !== REPORT_STATE.RESOLVED) {
-        await Report.update({
-          state: req.body.state
-        }, {
-          where: {
-            id: req.params.id
+        await Report.update(
+          {
+            state: req.body.state
+          },
+          {
+            where: {
+              id: req.params.id
+            }
           }
-        });
+        );
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
         });
       } else {
         transaction = await connection.sequelize.transaction();
-        await Report.update({
-          state: req.body.state
-        }, {
-          where: {
-            id: req.params.id
-          }
-        }, { transaction });
-        await Account.update({
-          state: STATES.INACTIVE
-        }, {
-          where: {
-            id: report.accountId
-          }
-        }, { transaction });
+        await Report.update(
+          {
+            state: req.body.state
+          },
+          {
+            where: {
+              id: req.params.id
+            }
+          },
+          { transaction }
+        );
+        await Account.update(
+          {
+            state: STATES.INACTIVE
+          },
+          {
+            where: {
+              id: report.accountId
+            }
+          },
+          { transaction }
+        );
         await transaction.commit();
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
@@ -131,13 +143,13 @@ exports.updateReport = async (req, res) => {
       }
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
-    })
+    });
   }
-}
+};

@@ -69,7 +69,8 @@ const Tutor = connection.sequelize.define(
     specialities: {
       type: Sequelize.TEXT
     }
-  }, {
+  },
+  {
     indexes: [
       {
         unique: false,

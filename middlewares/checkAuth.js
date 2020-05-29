@@ -1,14 +1,15 @@
 const jwt = require('jsonwebtoken');
-const msg =  require('../lib/constants/messages');
+const msg = require('../lib/constants/messages');
 
-module.exports = (role) => {
+module.exports = roles => {
   return (req, res, next) => {
     try {
       if (req.cookies.access_token) {
         const decoded = jwt.verify(req.cookies.access_token, process.env.JWT_KEY);
         req.role = decoded.role;
         req.username = decoded.username;
-        if (role && req.role > role) {
+        req.user = decoded;
+        if (!roles.includes(decoded.role)) {
           return res.status(403).json({
             message: msg.MSG_FORBIDDEN
           });
@@ -24,5 +25,5 @@ module.exports = (role) => {
         message: msg.MSG_UNAUTHORIZED
       });
     }
-  }
-}
+  };
+};

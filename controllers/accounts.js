@@ -19,10 +19,7 @@ exports.signIn = async (req, res) => {
   try {
     const account = await Account.findOne({
       where: {
-        [Op.or]: [
-          { username: req.body.user },
-          { email: req.body.user }
-        ],
+        [Op.or]: [{ username: req.body.user }, { email: req.body.user }],
         state: state.ACTIVE
       }
     });
@@ -35,7 +32,7 @@ exports.signIn = async (req, res) => {
           email: account.email,
           role: account.role,
           verification: account.verification
-        }
+        };
         if (account.role === ROLES.TUTOR) {
           const tutor = await Tutor.findOne({
             where: { accountId: account.id }
@@ -48,9 +45,9 @@ exports.signIn = async (req, res) => {
           resAcc.student = student;
         }
         const token = jwt.sign(resAcc, process.env.JWT_KEY);
-        let expireTime = constants.NO_REMEMBER_TOKEN_EXPIRES
+        let expireTime = constants.NO_REMEMBER_TOKEN_EXPIRES;
         if (req.body.remember) {
-          expireTime = constants.REMEMBER_TOKEN_EXPIRES
+          expireTime = constants.REMEMBER_TOKEN_EXPIRES;
         }
         res.cookie(constants.ACCESS_TOKEN, token, {
           expires: new Date(Date.now() + expireTime),
@@ -61,7 +58,7 @@ exports.signIn = async (req, res) => {
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS,
           account: resAcc
-        })
+        });
       }
     }
     return res.status(httpStatus.UNAUTHORIZED).json({
@@ -118,13 +115,16 @@ exports.verifyAccount = async (req, res) => {
       }
     });
     if (unverifiedAcc) {
-      await Account.update({
-        verification: verification.VERIFIED
-      }, {
-        where: {
-          email: unverifiedAcc.email
+      await Account.update(
+        {
+          verification: verification.VERIFIED
+        },
+        {
+          where: {
+            email: unverifiedAcc.email
+          }
         }
-      });
+      );
       await UnverifiedAccount.destroy({
         where: {
           id: req.params.id
@@ -144,10 +144,7 @@ exports.resetPassword = async (req, res) => {
     if (req.body.user) {
       const account = await Account.findOne({
         where: {
-          [Op.or]: [
-            { username: req.body.user },
-            { email: req.body.user }
-          ],
+          [Op.or]: [{ username: req.body.user }, { email: req.body.user }],
           state: state.ACTIVE,
           role: { [Op.not]: ROLES.ADMIN }
         }
@@ -174,7 +171,7 @@ exports.resetPassword = async (req, res) => {
     }
     return res.status(httpStatus.BAD_REQUEST).json({
       message: msg.MSG_INVALID_ACCOUNT
-    })
+    });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -209,26 +206,29 @@ exports.updateAccount = async (req, res) => {
     });
     if (!Object.values(state).includes(req.body.state)) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        message: msg.MSG_FAIL_TO_UPDATE,
+        message: msg.MSG_FAIL_TO_UPDATE
       });
     }
     if (account) {
-      await Account.update({
-        state: req.body.state
-      }, {
-        where: { id: account.id }
-      });
+      await Account.update(
+        {
+          state: req.body.state
+        },
+        {
+          where: { id: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS,
+        message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
-    })
+    });
   }
 };

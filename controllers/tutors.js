@@ -23,7 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const fsExtra = require('fs-extra');
 const Review = require('../models/Review');
-const Sequelize =  require('sequelize');
+const Sequelize = require('sequelize');
 const streamVideoFromPath = require('../lib/utils/streamVideoFromPath');
 
 const avatarStorage = multer.diskStorage({
@@ -49,7 +49,7 @@ exports.createDirCertificates = (req, res, next) => {
     fs.mkdirSync(dir, { recursive: true });
   }
   next();
-}
+};
 
 const certificatesStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -82,7 +82,7 @@ exports.uploadVideo = multer({ storage: videoStorage }).single('video');
 exports.streamVideo = async (req, res) => {
   const videoPath = `uploads/tutors/${req.params.username}/video/introVideo.webm`;
   streamVideoFromPath(req, res, videoPath);
-}
+};
 
 exports.updateTutorAvatar = async (req, res) => {
   try {
@@ -90,23 +90,26 @@ exports.updateTutorAvatar = async (req, res) => {
       where: { username: req.params.username }
     });
     if (account) {
-      await Tutor.update({ avatar: req.file.path }, {
-        where: { accountId: account.id }
-      });
+      await Tutor.update(
+        { avatar: req.file.path },
+        {
+          where: { accountId: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
-      })
+      });
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
     });
   }
-}
+};
 
 exports.updateTutorVideo = async (req, res) => {
   try {
@@ -114,23 +117,26 @@ exports.updateTutorVideo = async (req, res) => {
       where: { username: req.params.username }
     });
     if (account) {
-      await Tutor.update({ video: req.file.path }, {
-        where: { accountId: account.id }
-      });
+      await Tutor.update(
+        { video: req.file.path },
+        {
+          where: { accountId: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
-      })
+      });
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
     });
   }
-}
+};
 
 exports.updateTutorCertificates = async (req, res) => {
   try {
@@ -141,23 +147,26 @@ exports.updateTutorCertificates = async (req, res) => {
       const tutor = await Tutor.findOne({
         where: { accountId: account.id }
       });
-      await Tutor.update({ certificates: JSON.stringify(req.files) }, {
-        where: { accountId: account.id }
-      });
+      await Tutor.update(
+        { certificates: JSON.stringify(req.files) },
+        {
+          where: { accountId: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
-      })
+      });
     }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
     });
   }
-}
+};
 
 exports.createTutor = async (req, res) => {
   let transaction;
@@ -170,10 +179,7 @@ exports.createTutor = async (req, res) => {
     ) {
       const existAcc = await Account.findOne({
         where: {
-          [Op.or]: [
-            { username: req.body.username },
-            { email: req.body.email }
-          ]
+          [Op.or]: [{ username: req.body.username }, { email: req.body.email }]
         }
       });
       if (existAcc) {
@@ -184,22 +190,28 @@ exports.createTutor = async (req, res) => {
       transaction = await connection.sequelize.transaction();
       const hashPassword = bcrypt.hashSync(req.body.password, parseInt(process.env.SALT_ROUND));
       const accId = uuid();
-      await Account.create({
-        id: accId,
-        username: req.body.username,
-        password: hashPassword,
-        email: req.body.email,
-        role: roles.TUTOR,
-        verification: verfication.UNVERIFIED,
-        state: states.ACTIVE
-      }, { transaction });
+      await Account.create(
+        {
+          id: accId,
+          username: req.body.username,
+          password: hashPassword,
+          email: req.body.email,
+          role: roles.TUTOR,
+          verification: verfication.UNVERIFIED,
+          state: states.ACTIVE
+        },
+        { transaction }
+      );
       const tutorId = uuid();
-      await Tutor.create({
-        id: tutorId,
-        accountId: accId,
-        name: req.body.name,
-        profileStatus: profileStatus.PENDING
-      }, { transaction });
+      await Tutor.create(
+        {
+          id: tutorId,
+          accountId: accId,
+          name: req.body.name,
+          profileStatus: profileStatus.PENDING
+        },
+        { transaction }
+      );
       await transaction.commit();
 
       const responseAcc = {
@@ -241,29 +253,31 @@ exports.createTutor = async (req, res) => {
 exports.getAllTutors = async (req, res) => {
   try {
     let searchQuery = {};
-    if (req.query.search && req.query.search != "") {
+    if (req.query.search && req.query.search != '') {
       searchQuery = {
         [Op.or]: [
           { name: { [Op.like]: `%${req.query.search}%` } },
           { '$account.email$': { [Op.like]: `%${req.query.search}%` } },
-          { '$account.username$': { [Op.like]: `%${req.query.search}%` } },
+          { '$account.username$': { [Op.like]: `%${req.query.search}%` } }
         ]
-      }
+      };
     }
     if (req.query.state) {
-      searchQuery['$account.state$'] = req.query.state
+      searchQuery['$account.state$'] = req.query.state;
     }
     if (req.query.verification) {
-      searchQuery['$account.verification$'] = req.query.verification
+      searchQuery['$account.verification$'] = req.query.verification;
     }
     if (req.query.profileStatus) {
-      searchQuery.profileStatus = req.query.profileStatus
+      searchQuery.profileStatus = req.query.profileStatus;
     }
     const total = await Tutor.count({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'email', 'state', 'verification']
-      }],
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'email', 'state', 'verification']
+        }
+      ],
       attributes: ['id', 'name', 'profileStatus'],
       where: searchQuery
     });
@@ -271,10 +285,12 @@ exports.getAllTutors = async (req, res) => {
     const pageSize = req.query.size || total;
     const totalPages = Math.ceil(total / pageSize);
     const tutors = await Tutor.findAll({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'email', 'state', 'verification']
-      }],
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'email', 'state', 'verification']
+        }
+      ],
       attributes: ['id', 'name', 'profileStatus'],
       where: searchQuery,
       ...paginate({ page, pageSize })
@@ -285,71 +301,78 @@ exports.getAllTutors = async (req, res) => {
       totalResults: total,
       totalPages: totalPages
     });
-  }
-  catch (error) {
-    console.log(error)
+  } catch (error) {
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
-    })
+    });
   }
 };
 
 exports.getTutor = async (req, res) => {
   try {
     const tutor = await Tutor.findOne({
-      include: [{
-        model: Account,
-        attributes: ['id', 'username', 'state', 'verification', 'email']
-      },
-      {
-        model: CallHistory,
-        include: [
-          { 
-            model: Student, 
-            include: [{
-              model: Account,
-              attributes: ['id', 'username']
-            }],
-            attributes: ['id', 'name']
-          },
-          { 
-            model: Tutor, 
-            include: [{
-              model: Account,
-              attributes: ['id', 'username']
-            }],
-            attributes: ['id', 'name']
-          }
-        ]
-      }
+      include: [
+        {
+          model: Account,
+          attributes: ['id', 'username', 'state', 'verification', 'email']
+        },
+        {
+          model: CallHistory,
+          include: [
+            {
+              model: Student,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
+              attributes: ['id', 'name']
+            },
+            {
+              model: Tutor,
+              include: [
+                {
+                  model: Account,
+                  attributes: ['id', 'username']
+                }
+              ],
+              attributes: ['id', 'name']
+            }
+          ]
+        }
       ],
       where: { id: req.params.id }
     });
     if (tutor) {
       const review = await Review.findAll({
         where: {
-          tutorId: req.params.id,
+          tutorId: req.params.id
         },
-        attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'], [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']],
-        raw: true,
+        attributes: [
+          [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'],
+          [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']
+        ],
+        raw: true
       });
       tutor.dataValues.review = {
         avg: review[0].avg,
-        count: review[0].count,
-      }
+        count: review[0].count
+      };
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
         tutor: tutor.dataValues
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
-    })
+    });
   }
 };
 
@@ -361,29 +384,40 @@ exports.deleteTutor = async (req, res) => {
     });
     if (tutor) {
       transaction = await connection.sequelize.transaction();
-      await Account.destroy({
-        where: { id: tutor.accountId }
-      }, { transaction });
-      await Tutor.destroy({
-        where: { id: tutor.id }
-      }, { transaction });
+      await Account.destroy(
+        {
+          where: { id: tutor.accountId }
+        },
+        { transaction }
+      );
+      await Tutor.destroy(
+        {
+          where: { id: tutor.id }
+        },
+        { transaction }
+      );
       await transaction.commit();
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
-    })
+    });
   }
 };
 
 exports.updateTutor = async (req, res) => {
+  if (req.role != roles.ADMIN && req.params.id !== req.user.tutor.id) {
+    return res.status(httpStatus.FORBIDDEN).json({
+      message: msg.MSG_FORBIDDEN
+    });
+  }
   try {
     // only admin can send profileStatus
     if (req.body.profileStatus) {
@@ -421,24 +455,22 @@ exports.updateTutor = async (req, res) => {
         teaching_styles: JSON.stringify(req.body.teaching_styles) || tutor.teaching_styles,
         accent: req.body.accent || tutor.accent,
         fluency: req.body.fluency || tutor.fluency,
-        specialities: JSON.stringify(req.body.specialities) || tutor.specialities,
-      }
+        specialities: JSON.stringify(req.body.specialities) || tutor.specialities
+      };
       await Tutor.update(tutorInfo, {
         where: { id: tutor.id }
       });
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS,
+        message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_UPDATE
-    })
+    });
   }
 };
-
-

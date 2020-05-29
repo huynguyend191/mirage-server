@@ -40,7 +40,8 @@ const Student = connection.sequelize.define(
       type: Sequelize.INTEGER, //milliseconds
       defaultValue: 0
     }
-  }, {
+  },
+  {
     indexes: [
       {
         unique: false,

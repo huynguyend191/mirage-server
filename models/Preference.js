@@ -9,8 +9,8 @@ const Preference = connection.sequelize.define('preference', {
     primaryKey: true
   },
   type: {
-    type: Sequelize.INTEGER 
-  },
+    type: Sequelize.INTEGER
+  }
 });
 Student.belongsToMany(Tutor, { through: { model: Preference, unique: false } });
 Tutor.belongsToMany(Student, { through: { model: Preference, unique: false } });

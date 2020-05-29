@@ -4,8 +4,16 @@ const callHistoriesController = require('../controllers/callHistories');
 const checkAuth = require('../middlewares/checkAuth');
 const roles = require('../lib/constants/account').ROLES;
 
-router.get('/', callHistoriesController.getCallHistories);
-router.get('/:id/studentVideo', callHistoriesController.getStudenRecord);
-router.get('/:id/tutorVideo', callHistoriesController.getTutorRecord);
+router.get('/', checkAuth([roles.ADMIN, roles.STUDENT, roles.TUTOR]), callHistoriesController.getCallHistories);
+router.get(
+  '/:id/studentVideo',
+  checkAuth([roles.ADMIN, roles.STUDENT, roles.TUTOR]),
+  callHistoriesController.getStudenRecord
+);
+router.get(
+  '/:id/tutorVideo',
+  checkAuth([roles.ADMIN, roles.STUDENT, roles.TUTOR]),
+  callHistoriesController.getTutorRecord
+);
 
 module.exports = router;

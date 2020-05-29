@@ -9,10 +9,10 @@ const Account = connection.sequelize.define(
       primaryKey: true
     },
     username: {
-      type: Sequelize.STRING(36),
+      type: Sequelize.STRING(36)
     },
     email: {
-      type: Sequelize.STRING(255),
+      type: Sequelize.STRING(255)
     },
     password: {
       type: Sequelize.TEXT
@@ -25,27 +25,28 @@ const Account = connection.sequelize.define(
     },
     verification: {
       type: Sequelize.BOOLEAN
-    },
-  }, {
-  indexes: [
-    {
-      unique: true,
-      fields: ['username']
-    },
-    {
-      unique: true,
-      fields: ['email']
-    },
-    {
-      unique: false,
-      fields: ['role']
-    },
-    {
-      unique: false,
-      fields: ['state', 'verification']
     }
-  ]
-}
+  },
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ['username']
+      },
+      {
+        unique: true,
+        fields: ['email']
+      },
+      {
+        unique: false,
+        fields: ['role']
+      },
+      {
+        unique: false,
+        fields: ['state', 'verification']
+      }
+    ]
+  }
 );
 
 module.exports = Account;

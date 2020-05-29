@@ -12,7 +12,7 @@ exports.createSubscription = async (req, res) => {
   try {
     if (!req.body.studentId) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        message: msg.MSG_FAIL_TO_CREATE,
+        message: msg.MSG_FAIL_TO_CREATE
       });
     }
     const student = await Student.findOne({
@@ -22,7 +22,7 @@ exports.createSubscription = async (req, res) => {
     });
     if (!validateIntNumber(req.body.duration) || req.body.duration < 0) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        message: msg.MSG_FAIL_TO_CREATE,
+        message: msg.MSG_FAIL_TO_CREATE
       });
     }
     if (student) {
@@ -53,11 +53,11 @@ exports.createSubscription = async (req, res) => {
         tier: req.body.tier
       });
       return res.status(httpStatus.OK).json({
-        message: msg.MSG_SUCCESS,
+        message: msg.MSG_SUCCESS
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
@@ -65,7 +65,7 @@ exports.createSubscription = async (req, res) => {
       message: msg.MSG_FAIL_TO_CREATE
     });
   }
-}
+};
 
 exports.getStudentSubscriptions = async (req, res) => {
   try {
@@ -79,9 +79,7 @@ exports.getStudentSubscriptions = async (req, res) => {
         where: {
           studentId: student.id
         },
-        order: [
-          ['createdAt', 'DESC']
-        ]
+        order: [['createdAt', 'DESC']]
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
@@ -89,7 +87,7 @@ exports.getStudentSubscriptions = async (req, res) => {
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
@@ -97,7 +95,7 @@ exports.getStudentSubscriptions = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};
 
 exports.updateStudentSubscription = async (req, res) => {
   let transaction;
@@ -109,41 +107,52 @@ exports.updateStudentSubscription = async (req, res) => {
     });
     if (!validateIntNumber(req.body.state) || req.body.state < 1 || req.body.state > 3) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        message: msg.MSG_FAIL_TO_UPDATE,
+        message: msg.MSG_FAIL_TO_UPDATE
       });
     }
     if (subscription) {
       if (req.body.state !== STATE.COMPLETED) {
-        await Subscription.update({
-          state: req.body.state
-        }, {
-          where: {
-            id: req.params.id
+        await Subscription.update(
+          {
+            state: req.body.state
+          },
+          {
+            where: {
+              id: req.params.id
+            }
           }
-        });
+        );
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
         });
       } else {
         const student = await Student.findOne({
           where: { id: subscription.studentId }
-        })
+        });
         const newTime = student.remaining_time + subscription.duration;
         transaction = await connection.sequelize.transaction();
-        await Subscription.update({
-          state: req.body.state
-        }, {
-          where: {
-            id: req.params.id
-          }
-        }, { transaction });
-        await Student.update({
-          remaining_time: newTime
-        }, {
-          where: {
-            id: student.id
-          }
-        }, { transaction });
+        await Subscription.update(
+          {
+            state: req.body.state
+          },
+          {
+            where: {
+              id: req.params.id
+            }
+          },
+          { transaction }
+        );
+        await Student.update(
+          {
+            remaining_time: newTime
+          },
+          {
+            where: {
+              id: student.id
+            }
+          },
+          { transaction }
+        );
         await transaction.commit();
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
@@ -151,7 +160,7 @@ exports.updateStudentSubscription = async (req, res) => {
       }
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
@@ -160,29 +169,29 @@ exports.updateStudentSubscription = async (req, res) => {
       message: msg.MSG_FAIL_TO_UPDATE
     });
   }
-}
+};
 
 exports.getAllSubscriptions = async (req, res) => {
   let searchQuery = {};
   if (req.query.state) {
-    searchQuery.state = req.query.state
+    searchQuery.state = req.query.state;
   }
   if (req.query.tier) {
-    searchQuery.tier = req.query.tier
+    searchQuery.tier = req.query.tier;
   }
   try {
     const subscriptions = await Subscription.findAll({
       where: searchQuery,
-      order: [
-        ['createdAt', 'DESC']
-      ],
+      order: [['createdAt', 'DESC']],
       include: [
-        { 
-          model: Student, 
-          include: [{
-            model: Account,
-            attributes: ['id', 'username']
-          }]
+        {
+          model: Student,
+          include: [
+            {
+              model: Account,
+              attributes: ['id', 'username']
+            }
+          ]
         }
       ]
     });
@@ -196,4 +205,4 @@ exports.getAllSubscriptions = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};

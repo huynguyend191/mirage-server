@@ -2,10 +2,10 @@ const Review = require('../models/Review');
 const Student = require('../models/Student');
 const Tutor = require('../models/Tutor');
 const uuid = require('uuid').v4;
-const { validateIntNumber, validateString } = require('../lib/utils/validateData')
+const { validateIntNumber, validateString } = require('../lib/utils/validateData');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
-const Sequelize =  require('sequelize');
+const Sequelize = require('sequelize');
 
 exports.createReview = async (req, res) => {
   try {
@@ -28,14 +28,14 @@ exports.createReview = async (req, res) => {
     });
     return res.status(httpStatus.OK).json({
       message: msg.MSG_SUCCESS
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_CREATE
-    })
+    });
   }
-}
+};
 
 exports.getTutorReviews = async (req, res) => {
   try {
@@ -55,34 +55,35 @@ exports.getTutorReviews = async (req, res) => {
             attributes: ['name', 'avatar']
           }
         ],
-        order: [
-          ['createdAt', 'DESC']
-        ]
+        order: [['createdAt', 'DESC']]
       });
       const overview = await Review.findAll({
         where: {
-          tutorId: req.params.tutorId,
+          tutorId: req.params.tutorId
         },
-        attributes: [[Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'], [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']],
-        raw: true,
+        attributes: [
+          [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg'],
+          [Sequelize.fn('COUNT', Sequelize.col('rating')), 'count']
+        ],
+        raw: true
       });
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS,
         reviews: reviews,
         avg: overview[0].avg,
-        count: overview[0].count,
-      })
-    };
+        count: overview[0].count
+      });
+    }
     return res.status(httpStatus.NOT_FOUND).json({
       message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_READ
-    })
+    });
   }
-}
+};
 
 exports.deleteReview = async (req, res) => {
   try {
@@ -98,12 +99,12 @@ exports.deleteReview = async (req, res) => {
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
-    })
+    });
   }
-}
+};

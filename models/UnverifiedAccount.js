@@ -9,20 +9,22 @@ const UnverifiedAccount = connection.sequelize.define(
       primaryKey: true
     },
     email: {
-      type: Sequelize.STRING(255),
+      type: Sequelize.STRING(255)
     },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW
     }
-  }, {
-  indexes: [
-    {
-      unique: true,
-      fields: ['email']
-    }
-  ],
-  timestamps: false
-});
+  },
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ['email']
+      }
+    ],
+    timestamps: false
+  }
+);
 
 module.exports = UnverifiedAccount;

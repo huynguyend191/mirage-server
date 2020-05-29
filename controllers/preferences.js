@@ -12,10 +12,10 @@ exports.createPreference = async (req, res) => {
       id: uuid(),
       studentId: req.body.studentId,
       tutorId: req.body.tutorId,
-      type: req.body.type,
+      type: req.body.type
     });
     return res.status(httpStatus.OK).json({
-      message: msg.MSG_SUCCESS,
+      message: msg.MSG_SUCCESS
     });
   } catch (error) {
     console.log(error);
@@ -23,21 +23,21 @@ exports.createPreference = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};
 
 exports.getPreferences = async (req, res) => {
   try {
     const preferences = await Preference.findAll({
-      order: [
-        ['createdAt', 'DESC']
-      ],
+      order: [['createdAt', 'DESC']],
       include: [
-        { 
-          model: Tutor, 
-          include: [{
-            model: Account,
-            attributes: ['id', 'username']
-          }],
+        {
+          model: Tutor,
+          include: [
+            {
+              model: Account,
+              attributes: ['id', 'username']
+            }
+          ],
           attributes: ['id', 'name']
         }
       ]
@@ -52,7 +52,7 @@ exports.getPreferences = async (req, res) => {
       message: msg.MSG_FAIL_TO_READ
     });
   }
-}
+};
 
 exports.deletePreference = async (req, res) => {
   try {
@@ -68,12 +68,12 @@ exports.deletePreference = async (req, res) => {
       });
     }
     return res.status(httpStatus.NOT_FOUND).json({
-      message: msg.MSG_NOT_FOUND,
+      message: msg.MSG_NOT_FOUND
     });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
-    })
+    });
   }
-}
+};
