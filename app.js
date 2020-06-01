@@ -15,12 +15,12 @@ const subscriptionRoutes = require('./routes/subscriptions');
 const reportRoutes = require('./routes/reports');
 const preferenceRoutes = require('./routes/preferences.js');
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 'https://localhost:3000',
+    origin: 'https://192.168.0.164:3000',
     credentials: true
   })
 );
@@ -37,10 +37,10 @@ app.use('/api/preferences', preferenceRoutes);
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
-app.use(express.static(path.join(__dirname, "client/build")));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
-app.get("*", function(req, res) {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
 module.exports = app;

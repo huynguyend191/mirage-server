@@ -68,7 +68,7 @@ exports.getReports = async (req, res) => {
         },
         {
           model: Account,
-          attributes: ['id', 'username']
+          attributes: ['id', 'username', 'role']
         }
       ]
     });

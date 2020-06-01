@@ -10,12 +10,6 @@ const CallHistory = connection.sequelize.define('call_history', {
   },
   duration: {
     type: Sequelize.INTEGER //milliseconds
-  },
-  studentVideo: {
-    type: Sequelize.STRING
-  },
-  tutorVideo: {
-    type: Sequelize.STRING
   }
 });
 Student.belongsToMany(Tutor, { through: { model: CallHistory, unique: false } });
