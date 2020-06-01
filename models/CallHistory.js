@@ -10,6 +10,9 @@ const CallHistory = connection.sequelize.define('call_history', {
   },
   duration: {
     type: Sequelize.INTEGER //milliseconds
+  },
+  counted: {
+    type: Sequelize.BOOLEAN
   }
 });
 Student.belongsToMany(Tutor, { through: { model: CallHistory, unique: false } });
