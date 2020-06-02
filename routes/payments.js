@@ -4,9 +4,9 @@ const paymentController = require('../controllers/payments');
 const checkAuth = require('../middlewares/checkAuth');
 const roles = require('../lib/constants/account').ROLES;
 
-router.post('/', paymentController.createPayment);
-router.get('/:tutorId', paymentController.getTutorPayment);
-router.put('/:id', paymentController.updateTutorPayment);
-router.get('/', paymentController.getAllPayment);
+router.post('/', checkAuth([roles.TUTOR]), paymentController.createPayment);
+router.get('/:tutorId', checkAuth([roles.TUTOR]), paymentController.getTutorPayment);
+router.put('/:id', checkAuth([roles.ADMIN]), paymentController.updateTutorPayment);
+router.get('/', checkAuth([roles.ADMIN]), paymentController.getAllPayment);
 
 module.exports = router;

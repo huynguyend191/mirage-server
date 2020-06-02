@@ -10,6 +10,11 @@ const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 
 exports.createPayment = async (req, res) => {
+  if (req.body.tutorId !== req.user.tutor.id) {
+    return res.status(httpStatus.FORBIDDEN).json({
+      message: msg.MSG_FORBIDDEN
+    });
+  }
   let transaction;
   try {
     if (!req.body.tutorId) {
@@ -73,6 +78,11 @@ exports.createPayment = async (req, res) => {
 };
 
 exports.getTutorPayment = async (req, res) => {
+  if (req.params.tutorId !== req.user.tutor.id) {
+    return res.status(httpStatus.FORBIDDEN).json({
+      message: msg.MSG_FORBIDDEN
+    });
+  }
   try {
     const tutor = await Tutor.findOne({
       where: {

@@ -6,5 +6,6 @@ const roles = require('../lib/constants/account').ROLES;
 
 router.get('/', preferenceController.getPreferences);
 router.post('/', preferenceController.createPreference);
+router.delete('/:id', preferenceController.deletePreference);
 
 module.exports = router;
