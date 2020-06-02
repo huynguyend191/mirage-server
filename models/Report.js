@@ -21,5 +21,6 @@ const Report = connection.sequelize.define('reports', {
 
 Report.belongsTo(CallHistory);
 Report.belongsTo(Account);
+Account.hasMany(Report);
 
 module.exports = Report;

@@ -1,6 +1,7 @@
 const Account = require('../models/Account');
 const Tutor = require('../models/Tutor');
 const Student = require('../models/Student');
+const Payment = require('../models/Payment');
 const CallHistory = require('../models/CallHistory');
 const bcrypt = require('bcrypt');
 const connection = require('../database/connection');
@@ -25,6 +26,7 @@ const fsExtra = require('fs-extra');
 const Review = require('../models/Review');
 const Sequelize = require('sequelize');
 const streamVideoFromPath = require('../lib/utils/streamVideoFromPath');
+const Report = require('../models/Report');
 
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -315,8 +317,10 @@ exports.getTutor = async (req, res) => {
       include: [
         {
           model: Account,
-          attributes: ['id', 'username', 'state', 'verification', 'email']
+          attributes: ['id', 'username', 'state', 'verification', 'email'],
+          include: Report
         },
+        { model: Payment },
         {
           model: CallHistory,
           include: [
@@ -406,6 +410,7 @@ exports.deleteTutor = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
     });

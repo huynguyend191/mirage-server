@@ -2,6 +2,7 @@ const Account = require('../models/Account');
 const Student = require('../models/Student');
 const Tutor = require('../models/Tutor');
 const Subscription = require('../models/Subscription');
+const Report = require('../models/Report');
 const CallHistory = require('../models/CallHistory');
 const bcrypt = require('bcrypt');
 const connection = require('../database/connection');
@@ -209,7 +210,8 @@ exports.getStudent = async (req, res) => {
       include: [
         {
           model: Account,
-          attributes: ['id', 'username', 'state', 'verification', 'email']
+          attributes: ['id', 'username', 'state', 'verification', 'email'],
+          include: Report
         },
         {
           model: Subscription
@@ -289,6 +291,7 @@ exports.deleteStudent = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    if (transaction) await transaction.rollback();
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: msg.MSG_FAIL_TO_DELETE
     });
