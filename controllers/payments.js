@@ -5,7 +5,7 @@ const Account = require('../models/Account');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
-const { HISTORY_COUNT, PAYMENT_PER_MIN, STATE } = require('../lib/constants/payment');
+const { HISTORY_COUNT, PAYMENT_PER_MIN, STATE, MIN_VAL } = require('../lib/constants/payment');
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 
@@ -41,28 +41,37 @@ exports.createPayment = async (req, res) => {
         transaction = await connection.sequelize.transaction();
         uncountedHistory.forEach(async history => {
           duration += history.duration;
-          await CallHistory.update(
-            {
-              counted: HISTORY_COUNT.COUNTED,
-              paymentId: paymentId
-            },
-            { where: { id: history.id }, transaction }
-          );
         });
         const price = ((duration / 60000) * PAYMENT_PER_MIN).toFixed(2);
-        await Payment.create(
-          {
-            id: paymentId,
-            tutorId: tutor.id,
-            price: price,
-            state: STATE.PENDING
-          },
-          { transaction }
-        );
-        await transaction.commit();
-        return res.status(httpStatus.OK).json({
-          message: msg.MSG_SUCCESS
-        });
+        if (price < MIN_VAL) {
+          return res.status(httpStatus.BAD_REQUEST).json({
+            message: msg.MSG_PAYMENT_VALUE_SMALL
+          });
+        } else {
+          uncountedHistory.forEach(async history => {
+            duration += history.duration;
+            await CallHistory.update(
+              {
+                counted: HISTORY_COUNT.COUNTED,
+                paymentId: paymentId
+              },
+              { where: { id: history.id }, transaction }
+            );
+          });
+          await Payment.create(
+            {
+              id: paymentId,
+              tutorId: tutor.id,
+              price: price,
+              state: STATE.PENDING
+            },
+            { transaction }
+          );
+          await transaction.commit();
+          return res.status(httpStatus.OK).json({
+            message: msg.MSG_SUCCESS
+          });
+        }
       }
     }
     return res.status(httpStatus.NOT_FOUND).json({
