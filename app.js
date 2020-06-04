@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const path = require('path');
+const schedule = require('node-schedule');
 
 const accountRoutes = require('./routes/accounts');
 const tutorRoutes = require('./routes/tutors');
@@ -15,6 +16,8 @@ const subscriptionRoutes = require('./routes/subscriptions');
 const reportRoutes = require('./routes/reports');
 const preferenceRoutes = require('./routes/preferences');
 const paymentRoutes = require('./routes/payments');
+
+const { createRecommend } = require('./controllers/preferences');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -44,6 +47,11 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
+// auto get recommend tutors for students every Sunday
+schedule.scheduleJob('* * 0 * * 7', () => {
+  createRecommend();
 });
 
 module.exports = app;
