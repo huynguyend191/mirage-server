@@ -6,6 +6,6 @@ const roles = require('../lib/constants/account').ROLES;
 
 router.post('/', checkAuth([roles.STUDENT]), reviewController.createReview);
 router.get('/:tutorId', checkAuth([roles.ADMIN, roles.STUDENT, roles.TUTOR]), reviewController.getTutorReviews);
-router.delete('/:id', checkAuth([roles.STUDENT]), reviewController.deleteReview);
+router.delete('/:id', checkAuth([roles.STUDENT, roles.ADMIN]), reviewController.deleteReview);
 
 module.exports = router;

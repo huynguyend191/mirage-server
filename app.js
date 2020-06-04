@@ -16,6 +16,7 @@ const subscriptionRoutes = require('./routes/subscriptions');
 const reportRoutes = require('./routes/reports');
 const preferenceRoutes = require('./routes/preferences');
 const paymentRoutes = require('./routes/payments');
+const statRoutes = require('./routes/stats');
 
 const { createRecommend } = require('./controllers/preferences');
 
@@ -39,6 +40,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/preferences', preferenceRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/stats', statRoutes);
 
 app.use('/uploads/students', express.static(__dirname + '/uploads/students'));
 app.use('/uploads/tutors', express.static(__dirname + '/uploads/tutors'));
