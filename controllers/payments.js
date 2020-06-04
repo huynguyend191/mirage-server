@@ -2,10 +2,13 @@ const Tutor = require('../models/Tutor');
 const CallHistory = require('../models/CallHistory');
 const Payment = require('../models/Payment');
 const Account = require('../models/Account');
+const Setting = require('../models/Setting');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
 const { HISTORY_COUNT, PAYMENT_PER_MIN, STATE, MIN_VAL } = require('../lib/constants/payment');
+const { TUTOR_PRICE } = require('../lib/constants/common');
+
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 
@@ -36,13 +39,19 @@ exports.createPayment = async (req, res) => {
         },
         raw: true
       });
+      console.log(uncountedHistory)
       if (uncountedHistory.length > 0) {
         let duration = 0;
         transaction = await connection.sequelize.transaction();
         uncountedHistory.forEach(async history => {
           duration += history.duration;
         });
-        const price = ((duration / 60000) * PAYMENT_PER_MIN).toFixed(2);
+        const paymentPerMin = await Setting.findOne({
+          where: {
+            type: TUTOR_PRICE
+          }
+        });
+        const price = ((duration / 60000) * Number(paymentPerMin.dataValues.content)).toFixed(2);
         if (price < MIN_VAL) {
           return res.status(httpStatus.BAD_REQUEST).json({
             message: msg.MSG_PAYMENT_VALUE_SMALL

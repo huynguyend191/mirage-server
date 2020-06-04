@@ -1,10 +1,13 @@
 const Subscription = require('../models/Subscription');
 const Student = require('../models/Student');
 const Account = require('../models/Account');
+const Setting = require('../models/Setting');
 const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
-const { STATE, TIER, DISCOUNT_RATE, PRICE_PER_MIN } = require('../lib/constants/subscriptions');
+const { STATE, TIER } = require('../lib/constants/subscriptions');
+const { STUDENT_PRICE, DISCOUNT_RATE} = require('../lib/constants/common');
+
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 
@@ -25,21 +28,32 @@ exports.createSubscription = async (req, res) => {
         message: msg.MSG_FAIL_TO_CREATE
       });
     }
+    const pricePerMin = await Setting.findOne({
+      where: {
+        type: STUDENT_PRICE
+      }
+    });
+    const discountRateRaw = await Setting.findOne({
+      where: {
+        type: DISCOUNT_RATE
+      }
+    });
+    const discountRate = JSON.parse(discountRateRaw.dataValues.content)
     if (student) {
-      const rawPrice = (req.body.duration / 60000) * PRICE_PER_MIN;
+      const rawPrice = (req.body.duration / 60000) * Number(pricePerMin.dataValues.content);
       let price;
       switch (req.body.tier) {
         case TIER.NORMAL:
-          price = rawPrice * DISCOUNT_RATE.NORMAL;
+          price = rawPrice * discountRate.NORMAL;
           break;
         case TIER.SILVER:
-          price = rawPrice * DISCOUNT_RATE.SILVER;
+          price = rawPrice * discountRate.SILVER;
           break;
         case TIER.GOLD:
-          price = rawPrice * DISCOUNT_RATE.GOLD;
+          price = rawPrice * discountRate.GOLD;
           break;
         case TIER.PLATIUM:
-          price = rawPrice * DISCOUNT_RATE.PLATIUM;
+          price = rawPrice * discountRate.PLATIUM;
           break;
         default:
           break;
