@@ -39,7 +39,6 @@ exports.createPayment = async (req, res) => {
         },
         raw: true
       });
-      console.log(uncountedHistory)
       if (uncountedHistory.length > 0) {
         let duration = 0;
         transaction = await connection.sequelize.transaction();

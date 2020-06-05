@@ -15,6 +15,7 @@ const validateString = require('../lib/utils/validateData').validateString;
 const roles = require('../lib/constants/account').ROLES;
 const states = require('../lib/constants/account').STATES;
 const verfication = require('../lib/constants/account').VERIFICATION;
+const trialTime = require('../lib/constants/account').TRIAL_TIME;
 const constants = require('../lib/constants/common');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../lib/utils/sendMail');
@@ -106,7 +107,8 @@ exports.createStudent = async (req, res) => {
         {
           id: studentId,
           accountId: accId,
-          name: req.body.name
+          name: req.body.name,
+          remaining_time: trialTime
         },
         { transaction }
       );
