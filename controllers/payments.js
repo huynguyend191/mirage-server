@@ -8,9 +8,9 @@ const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
 const { HISTORY_COUNT, PAYMENT_PER_MIN, STATE, MIN_VAL } = require('../lib/constants/payment');
 const { TUTOR_PRICE } = require('../lib/constants/common');
-
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
+const sendMail = require('../lib/utils/sendMail');
 
 exports.createPayment = async (req, res) => {
   if (req.body.tutorId !== req.user.tutor.id) {
@@ -153,6 +153,13 @@ exports.updateTutorPayment = async (req, res) => {
           }
         }
       );
+      if (req.body.state === STATE.COMPLETED) {
+        const tutor = await Tutor.findOne({
+          where: { id: payment.tutorId },
+          include: Account
+        });
+        sendMail.paymentComplete(tutor.account.email);
+      }
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       });

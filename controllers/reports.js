@@ -9,6 +9,7 @@ const { validateIntNumber, validateString } = require('../lib/utils/validateData
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
 const { REPORT_STATE, STATES } = require('../lib/constants/account');
+const sendMail = require('../lib/utils/sendMail');
 
 exports.createReport = async (req, res) => {
   if (!validateString(req.body.reason)) {
@@ -98,6 +99,11 @@ exports.updateReport = async (req, res) => {
       }
     });
     if (report) {
+      const account = await Account.findOne({
+        where: {
+          id: report.accountId
+        }
+      });
       if (req.body.state !== REPORT_STATE.RESOLVED) {
         await Report.update(
           {
@@ -137,6 +143,7 @@ exports.updateReport = async (req, res) => {
           { transaction }
         );
         await transaction.commit();
+        sendMail.banAccountMail(account.email);
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
         });

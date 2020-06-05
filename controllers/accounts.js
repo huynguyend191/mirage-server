@@ -14,6 +14,7 @@ const Op = require('sequelize').Op;
 const sendMail = require('../lib/utils/sendMail');
 const validateEmail = require('../lib/utils/validateData').validateEmail;
 const ROLES = require('../lib/constants/account').ROLES;
+const ACC_STATE = require('../lib/constants/account').STATES;
 
 exports.signIn = async (req, res) => {
   try {
@@ -218,6 +219,12 @@ exports.updateAccount = async (req, res) => {
           where: { id: account.id }
         }
       );
+      if (req.body.state === ACC_STATE.INACTIVE) {
+        sendMail.banAccountMail(account.email);
+      }
+      if (req.body.state === ACC_STATE.ACTIVE) {
+        sendMail.unbanAccountMail(account.email);
+      }
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       });

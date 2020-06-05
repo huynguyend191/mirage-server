@@ -6,7 +6,8 @@ const httpStatus = require('http-status-codes');
 const msg = require('../lib/constants/messages');
 const { validateIntNumber } = require('../lib/utils/validateData');
 const { STATE, TIER } = require('../lib/constants/subscriptions');
-const { STUDENT_PRICE, DISCOUNT_RATE} = require('../lib/constants/common');
+const { STUDENT_PRICE, DISCOUNT_RATE } = require('../lib/constants/common');
+const sendMail = require('../lib/utils/sendMail');
 
 const uuid = require('uuid').v4;
 const connection = require('../database/connection');
@@ -38,7 +39,7 @@ exports.createSubscription = async (req, res) => {
         type: DISCOUNT_RATE
       }
     });
-    const discountRate = JSON.parse(discountRateRaw.dataValues.content)
+    const discountRate = JSON.parse(discountRateRaw.dataValues.content);
     if (student) {
       const rawPrice = (req.body.duration / 60000) * Number(pricePerMin.dataValues.content);
       let price;
@@ -168,6 +169,10 @@ exports.updateStudentSubscription = async (req, res) => {
           { transaction }
         );
         await transaction.commit();
+        const account = await Account.findOne({
+          where: { id: student.accountId }
+        });
+        sendMail.subscriptionComplete(account.email);
         return res.status(httpStatus.OK).json({
           message: msg.MSG_SUCCESS
         });
