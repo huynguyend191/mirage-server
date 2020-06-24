@@ -119,6 +119,12 @@ exports.updateTutorVideo = async (req, res) => {
       where: { username: req.params.username }
     });
     if (account) {
+      await Tutor.update(
+        { video: req.file.path },
+        {
+          where: { accountId: account.id }
+        }
+      );
       return res.status(httpStatus.OK).json({
         message: msg.MSG_SUCCESS
       });
