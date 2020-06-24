@@ -48,9 +48,6 @@ const Tutor = connection.sequelize.define(
     reason: {
       type: Sequelize.TEXT
     },
-    video: {
-      type: Sequelize.TEXT
-    },
     student_lvl: {
       type: Sequelize.STRING(40)
     },
